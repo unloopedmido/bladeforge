@@ -35,7 +35,7 @@ export function getRandomProperty(
 }
 
 export function generateSword(user: User) {
-  const userLuck = Number(user.luck) * (user.vip ? 1.25 : 0); // VIP users get a 25% luck bonus
+  const userLuck = Number(user.luck) * (user.vip ? 1.25 : 1); // VIP users get a 25% luck bonus
   const material = getRandomProperty(Materials, userLuck);
   const rarity = getRandomProperty(Rarities, userLuck);
   const quality = getRandomProperty(Qualities, userLuck);
