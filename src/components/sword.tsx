@@ -139,7 +139,7 @@ function Content({ sword }: SwordProps) {
 export default function Sword({ sword }: SwordProps) {
   return (
     <>
-      {(Rarities.find((r) => r.name === sword.rarity)?.chance ?? 0) >= 729 ? (
+      {(Rarities.find((r) => r.name === sword.rarity)?.chance ?? 0) >= 336 ? (
         <ShineBorder
           borderWidth={5}
           duration={14}
