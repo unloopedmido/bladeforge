@@ -1,5 +1,4 @@
 import { Button } from "@/components/ui/button";
-import { api } from "@/utils/api";
 import { useTheme } from "next-themes";
 
 export default function Settings() {

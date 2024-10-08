@@ -27,7 +27,7 @@ export default function Blades() {
   const { mutate: equipSword } = api.sword.equipSword.useMutation({
     onSuccess: (data) => {
       if(data.success) {
-        refetch();
+        void refetch();
       toast.success("Sword equipped successfully");
       } else {
         toast.error(data.message);
@@ -37,7 +37,7 @@ export default function Blades() {
 
   const { mutate: sellSword } = api.sword.sellSword.useMutation({
     onSuccess: () => {
-      refetch()
+      void refetch()
       toast.success("Sword sold successfully");
     },
   });
