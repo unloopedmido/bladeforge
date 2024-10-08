@@ -40,8 +40,8 @@ export function generateSword(user: User) {
   const rarity = getRandomProperty(Rarities, userLuck);
   const quality = getRandomProperty(Qualities, userLuck);
   const aura = getRandomProperty(Auras, user.vip ? 1.25 : 1);
-  const shiny = Math.random() < 0.5; // 50% chance of being shiny
-
+  const shiny = Math.random() < 0.25; // 25% chance of being shiny
+  
   const value = Math.floor(
     (material?.valueMultiplier ?? 1) *
       (rarity?.valueMultiplier ?? 1) *

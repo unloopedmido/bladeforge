@@ -16,7 +16,7 @@ const MyApp: AppType<{ session: Session | null }> = ({
   pageProps: { session, ...pageProps },
 }) => {
   return (
-    <SessionProvider session={session}>
+    <SessionProvider refetchOnWindowFocus={false} session={session}>
       <Head>
         <title>BladeForge - Your Idle Factory</title>
         <meta name="title" content="BladeForge - Your Idle Factory" />

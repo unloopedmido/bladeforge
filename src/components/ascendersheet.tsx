@@ -35,11 +35,11 @@ export default function AscenderSheet({
     onSuccess: (data) => {
       toast.success(data.message);
       setSword(data.sword);
-      setCooldown(user?.vip ? 1000 : 2000);
+      setCooldown(user?.vip ? 1000 : 1500);
     },
     onError: (error) => {
       toast.error(error.message);
-      setCooldown(user?.vip ? 1000 : 2000);
+      setCooldown(user?.vip ? 1000 : 1500);
     },
   });
 
@@ -68,9 +68,7 @@ export default function AscenderSheet({
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>
-            Sword Ascender
-          </DialogTitle>
+          <DialogTitle>Sword Ascender</DialogTitle>
           <DialogDescription>
             Upgrade your sword&apos;s properties below to increase its value and
             damage!

@@ -281,7 +281,7 @@ export const swordRouter = createTRPCRouter({
         });
 
         return {
-          message: `Upgraded successfully! You got ${attemptedProperty.name} (1/${Math.round(attemptedProperty.chance / Number(user.luck))})`,
+          message: `Upgraded successfully! You got ${attemptedProperty.name} (1/${Math.round(attemptedProperty.chance / userLuck)})`,
           sword: await ctx.db.sword.findUnique({ where: { id: sword.id } }),
         };
       }
@@ -293,7 +293,7 @@ export const swordRouter = createTRPCRouter({
 
       throw new TRPCError({
         code: "BAD_REQUEST",
-        message: `Failed to Upgrade!\nYou got ${attemptedProperty.name} (1/${Math.round(attemptedProperty.chance / Number(user.luck))})`,
+        message: `Failed to Upgrade!\nYou got ${attemptedProperty.name} (1/${Math.round(attemptedProperty.chance / userLuck)})`,
       });
     }),
 });

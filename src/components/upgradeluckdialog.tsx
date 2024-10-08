@@ -17,8 +17,8 @@ import { api } from "@/utils/api";
 import { toast } from "sonner";
 
 // Constants
-const DIFFICULTY_MULTIPLIER = 1.2;
-const BASE_COST = 100;
+const DIFFICULTY_MULTIPLIER = 1.18;
+const BASE_COST = 95;
 
 interface UpgradeLuckDialogProps {
   user: UserType | null;
@@ -30,7 +30,9 @@ export default function UpgradeLuckDialog({
   setUser,
 }: UpgradeLuckDialogProps) {
   const [luckIncrement, setLuckIncrement] = useState<number>(1);
-  const [cooldownRemaining, setCooldownRemaining] = useState<number | null>(null);
+  const [cooldownRemaining, setCooldownRemaining] = useState<number | null>(
+    null,
+  );
   const [isButtonDisabled, setIsButtonDisabled] = useState(false);
 
   // Derived state
@@ -43,13 +45,13 @@ export default function UpgradeLuckDialog({
       let totalCost = 0;
       for (let i = 0; i < increment; i++) {
         const incrementCost = Math.round(
-          BASE_COST * Math.pow(DIFFICULTY_MULTIPLIER, currentLuck + i)
+          BASE_COST * Math.pow(DIFFICULTY_MULTIPLIER, currentLuck + i),
         );
         totalCost += incrementCost;
       }
       return totalCost;
     },
-    []
+    [],
   );
 
   const calculateMaxAffordableLuck = useCallback(() => {
@@ -77,17 +79,20 @@ export default function UpgradeLuckDialog({
     },
     onError: (error) => {
       const remainingTimeMatch = /(\d+)/.exec(error.message); // Match the number in the message
-      const remainingTime = remainingTimeMatch ? parseInt(remainingTimeMatch[0]) : null;
-  
+      const remainingTime = remainingTimeMatch
+        ? parseInt(remainingTimeMatch[0])
+        : null;
+
       if (remainingTime) {
-        toast.error(`Please wait ${remainingTime} seconds before upgrading again.`);
+        toast.error(
+          `Please wait ${remainingTime} seconds before upgrading again.`,
+        );
         setCooldownRemaining(remainingTime); // Set cooldown time from message
       } else {
         toast.error("An error occurred while upgrading luck.");
       }
     },
   });
-  
 
   // Handle cooldown countdown
   useEffect(() => {
@@ -122,6 +127,14 @@ export default function UpgradeLuckDialog({
   const moneyRequired = calculateUpgradeCost(currentLuck, luckIncrement);
   const maxAffordableLuck = calculateMaxAffordableLuck();
 
+  useEffect(() => {
+    console.log('currentMoney:', currentMoney);
+    console.log('moneyRequired:', moneyRequired);
+    console.log('isButtonDisabled:', isButtonDisabled);
+    console.log('isPending:', isPending);
+    console.log('luckIncrement:', luckIncrement);
+  }, [currentMoney, moneyRequired, isButtonDisabled, isPending, luckIncrement]);
+
   return (
     <Dialog>
       <DialogTrigger asChild>
@@ -155,8 +168,12 @@ export default function UpgradeLuckDialog({
           type="number"
           placeholder="Luck Amount"
           value={luckIncrement}
+          max={100}
+          min={1}
           onChange={(e) =>
-            setLuckIncrement(Math.max(1, parseInt(e.target.value)))
+            setLuckIncrement(
+              Math.min(Number(e.target.value), 100),
+            )
           }
         />
 
@@ -169,7 +186,12 @@ export default function UpgradeLuckDialog({
         <DialogFooter>
           <Button
             onClick={handleUpgradeLuck}
-            disabled={currentMoney < moneyRequired || isButtonDisabled || isPending}
+            disabled={
+              currentMoney < moneyRequired ||
+              isButtonDisabled ||
+              isPending ||
+              luckIncrement === 0
+            }
           >
             {isPending ? "Upgrading..." : "Upgrade Luck"}
           </Button>

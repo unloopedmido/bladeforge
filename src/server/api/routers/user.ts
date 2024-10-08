@@ -2,11 +2,31 @@ import { z } from "zod";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
 import { TRPCError } from "@trpc/server";
 
-const DIFFICULTY_MULTIPLIER = 1.2;
+const DIFFICULTY_MULTIPLIER = 1.18;
 const COOLDOWN_DURATION = 2000;
-const BASE_COST = 100;
+const BASE_COST = 95;
 
 export const userRouter = createTRPCRouter({
+  getUsers: protectedProcedure.query(async ({ ctx }) => {
+    try {
+      const users = await ctx.db.user.findMany({
+        take: 25,
+        orderBy: { luck: "desc" },
+        include: {
+          swords: true,
+        },
+      });
+
+      return users;
+    } catch (error) {
+      console.error("Error fetching users:", error);
+      throw new TRPCError({
+        code: "INTERNAL_SERVER_ERROR",
+        message: "An unexpected error occurred",
+        cause: error,
+      });
+    }
+  }),
   user: protectedProcedure.query(async ({ ctx }) => {
     // Check if user is authenticated
     const user = await ctx.db.user.findUnique({
