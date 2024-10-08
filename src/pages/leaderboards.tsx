@@ -12,11 +12,7 @@ import {
   HoverCardContent,
   HoverCardTrigger,
 } from "@/components/ui/hover-card";
-import {
-  Avatar,
-  AvatarFallback,
-  AvatarImage,
-} from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { abbreviateNumber, getLevelFromExperience } from "@/lib/func";
 import { api } from "@/utils/api";
 import type { User as UserType } from "@prisma/client";
@@ -56,9 +52,9 @@ export default function Leaderboards() {
   }
 
   function formatDate(date: Date) {
-    return new Intl.DateTimeFormat('en-US', {
-      month: 'long',
-      year: 'numeric'
+    return new Intl.DateTimeFormat("en-US", {
+      month: "long",
+      year: "numeric",
     }).format(date);
   }
 
@@ -73,7 +69,7 @@ export default function Leaderboards() {
         <p className="text-center text-2xl font-semibold">Loading...</p>
       ) : (
         <Table>
-          <TableCaption>Top 25 Users (sorted by luck)</TableCaption>
+          <TableCaption>Top 10 Users (sorted by luck)</TableCaption>
           <TableHeader>
             <TableRow>
               <TableHead>Position</TableHead>
@@ -93,36 +89,55 @@ export default function Leaderboards() {
                     <HoverCardTrigger className="cursor-pointer font-medium underline">
                       {user.name}
                     </HoverCardTrigger>
-                    <HoverCardContent className="w-80">
+                    <HoverCardContent
+                      className="w-80"
+                      style={user.vip ? { border: "1px solid #ca8a04" } : {}}
+                    >
                       <div className="flex justify-between space-x-4">
-                        <Avatar>
-                          <AvatarImage src={user.image ?? undefined} />
-                          <AvatarFallback>{user.name?.slice(0, 2).toUpperCase()}</AvatarFallback>
-                        </Avatar>
+                        <div className="flex items-center justify-center">
+                          <Avatar className="h-28 w-28">
+                            <AvatarImage src={user.image ?? undefined} />
+                            <AvatarFallback>
+                              {user.name?.slice(0, 2).toUpperCase()}
+                            </AvatarFallback>
+                          </Avatar>
+                        </div>
                         <div className="space-y-1">
-                          <h4 className="text-sm font-semibold">{user.name}</h4>
-                          <div className="flex items-center gap-1 text-sm">
-                            {user.vip && 
+                          <h4
+                            className={
+                              "flex items-center gap-x-2 text-sm font-semibold" +
+                              (user.vip ? " text-yellow-500" : "")
+                            }
+                          >
+                            {user.vip && (
                               <span className="rounded bg-gradient-to-r from-yellow-400 to-yellow-600 px-1 text-xs font-bold text-black">
                                 VIP
                               </span>
-                            }
-                            <span className={user.vip ? "text-yellow-500" : ""}>
-                              Level {getLevelFromExperience(Number(user.experience))}
-                            </span>
+                            )}
+                            {user.name}
+                          </h4>
+                          <div className="flex items-center gap-1 text-sm">
+                            Level{" "}
+                            {getLevelFromExperience(Number(user.experience))}
                           </div>
                           <div className="space-y-2 pt-2">
                             <div className="flex items-center text-sm">
                               <CoinsIcon className="mr-2 h-4 w-4 opacity-70" />
-                              <span>{abbreviateNumber(Number(user.money))} coins</span>
+                              <span>
+                                {abbreviateNumber(Number(user.money))} coins
+                              </span>
                             </div>
                             <div className="flex items-center text-sm">
                               <SwordIcon className="mr-2 h-4 w-4 opacity-70" />
-                              <span>{user.swords.length || 0} sword(s) stored</span>
+                              <span>
+                                {user.swords.length || 0} sword(s) stored
+                              </span>
                             </div>
                             <div className="flex items-center text-sm">
                               <CloverIcon className="mr-2 h-4 w-4 opacity-70" />
-                              <span>{abbreviateNumber(Number(user.luck))} luck</span>
+                              <span>
+                                {abbreviateNumber(Number(user.luck))} luck
+                              </span>
                             </div>
                             <div className="flex items-center text-xs text-muted-foreground">
                               <CalendarIcon className="mr-2 h-4 w-4 opacity-70" />
@@ -134,7 +149,9 @@ export default function Leaderboards() {
                     </HoverCardContent>
                   </HoverCard>
                 </TableCell>
-                <TableCell>{getLevelFromExperience(Number(user.experience))}</TableCell>
+                <TableCell>
+                  {getLevelFromExperience(Number(user.experience))}
+                </TableCell>
                 <TableCell>{abbreviateNumber(Number(user.money))}</TableCell>
                 <TableCell>{abbreviateNumber(Number(user.luck))}</TableCell>
                 <TableCell>{userStatus(user)}</TableCell>

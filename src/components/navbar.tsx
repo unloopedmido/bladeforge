@@ -18,8 +18,23 @@ import {
 } from "./ui/dropdown-menu";
 import { signIn, useSession } from "next-auth/react";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
+import type { User } from "@prisma/client";
+import { useEffect, useState } from "react";
+import { api } from "@/utils/api";
+import { HoverCard, HoverCardContent, HoverCardTrigger } from "./ui/hover-card";
 
 export default function Navbar() {
+  const [user, setUser] = useState<User | null>(null);
+
+  const { data, isLoading } = api.user.user.useQuery(undefined, {
+    refetchOnWindowFocus: false,
+    refetchOnMount: true,
+  });
+
+  useEffect(() => {
+    if (data) setUser(data.user);
+  }, [data]);
+
   const links = [
     { title: "Home", href: "/" },
     { title: "Forge", href: "/forge" },
@@ -32,7 +47,7 @@ export default function Navbar() {
   const { status, data: session } = useSession();
 
   return (
-    <nav className="mb-10 container mx-auto flex items-center justify-between p-3">
+    <nav className="container mx-auto mb-10 flex items-center justify-between p-3">
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button
@@ -52,7 +67,7 @@ export default function Navbar() {
           ))}
         </DropdownMenuContent>
       </DropdownMenu>
-      <Link href="/" className="text-xl font-bold flex items-center">
+      <Link href="/" className="flex items-center text-xl font-bold">
         <Swords className="mr-2 fill-white" />
         BladeForge
       </Link>
@@ -69,8 +84,49 @@ export default function Navbar() {
           ))}
         </NavigationMenuList>
       </NavigationMenu>
-      {status === "authenticated" && session.user.name ? (
-        <div>
+      {status === "authenticated" && session.user.name && !isLoading ? (
+        <div className="flex items-center gap-x-2">
+          {user?.vip && (
+            <HoverCard>
+              <HoverCardTrigger asChild>
+                <p className="rounded-full bg-gradient-to-br from-yellow-300 to-yellow-800 px-3 py-1 text-xs font-bold text-black">
+                  VIP
+                </p>
+              </HoverCardTrigger>
+              <HoverCardContent className="w-80 bg-gradient-to-br from-yellow-600 to-yellow-900">
+                <div className="space-y-1">
+                  <ul className="space-y-1.5 text-sm text-foreground/80">
+                    <li>
+                      <strong className="font-semibold text-white">
+                        25% Luck Boost:
+                      </strong>{" "}
+                      Increase your chances of forging rare and powerful swords.
+                    </li>
+                    <li>
+                      <strong className="font-semibold text-white">
+                        50% Faster Ascension Speed:
+                      </strong>{" "}
+                      Climb the ranks faster and show off your skills.
+                    </li>
+                    <li>
+                      <strong className="font-semibold text-white">
+                        20 Extra Sword Storage Slots:
+                      </strong>{" "}
+                      Keep more of your best creations!
+                    </li>
+                    <li>
+                      <strong className="font-semibold text-white">
+                        Special VIP Nametag:
+                      </strong>{" "}
+                      Stand out on the leaderboard and your profile with a
+                      unique badge.
+                    </li>
+                  </ul>
+                </div>
+              </HoverCardContent>
+            </HoverCard>
+          )}
+
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Avatar>
@@ -79,13 +135,19 @@ export default function Navbar() {
               </Avatar>
             </DropdownMenuTrigger>
             <DropdownMenuContent>
-              <DropdownMenuLabel>{session.user.name}</DropdownMenuLabel>
+              <DropdownMenuLabel>
+                <div className="flex flex-col space-y-1">
+                  <p className="text-sm font-medium leading-none">
+                    @{session.user.name}
+                  </p>
+                  <p className="text-xs leading-none text-muted-foreground">
+                    {session.user.email}
+                  </p>
+                </div>
+              </DropdownMenuLabel>{" "}
               <DropdownMenuSeparator />
               <DropdownMenuItem asChild>
                 <Link href="/profile">Profile</Link>
-              </DropdownMenuItem>
-              <DropdownMenuItem asChild>
-                <Link href="/settings">Settings</Link>
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem asChild>

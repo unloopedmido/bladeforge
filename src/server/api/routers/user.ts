@@ -10,10 +10,13 @@ export const userRouter = createTRPCRouter({
   getUsers: protectedProcedure.query(async ({ ctx }) => {
     try {
       const users = await ctx.db.user.findMany({
-        take: 25,
+        take: 10,
         orderBy: { luck: "desc" },
         include: {
           swords: true,
+        },
+        where: {
+          luck: { not: BigInt(1) || 1 },
         },
       });
 
