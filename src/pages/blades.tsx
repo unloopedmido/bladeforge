@@ -12,9 +12,12 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { api } from "@/utils/api";
+import { useSession } from "next-auth/react";
 import { toast } from "sonner";
 
 export default function Blades() {
+  const {data:session} = useSession();
+
   const {
     data: swords,
     isLoading,
@@ -66,7 +69,7 @@ export default function Blades() {
             swords.swords.map((sword) => (
               <AlertDialog key={sword.id}>
                 <AlertDialogTrigger className="text-start">
-                  <Sword sword={sword} />
+                  <Sword username={session?.user.name ?? ""} sword={sword} />
                 </AlertDialogTrigger>
                 <AlertDialogContent>
                   <AlertDialogHeader>

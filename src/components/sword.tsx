@@ -1,6 +1,6 @@
 import ShineBorder from "./ui/shine-border";
 import Rarities from "@/data/rarities";
-import { type Sword as SwordType, type User as UserType } from "@prisma/client";
+import { type Sword as SwordType } from "@prisma/client";
 import { abbreviateNumber, rgbToAlpha } from "@/lib/func";
 import { LinearGradient } from "react-text-gradients";
 import { Fredoka } from "next/font/google";
@@ -14,10 +14,10 @@ const CoolFont = Fredoka({
 
 interface SwordProps {
   sword: SwordType;
-  user: UserType;
+  username: string;
 }
 
-function Content({ sword, user }: SwordProps) {
+function Content({ sword, username }: SwordProps) {
   return (
     <div
       className="relative h-[300px] w-[300px] p-3"
@@ -62,7 +62,7 @@ function Content({ sword, user }: SwordProps) {
         }}
         className={cn("text-2xl font-bold text-purple-300", CoolFont.className)}
       >
-        {`${user.name!.slice(0, 8)}'s Sword`}
+        {`${username.slice(0, 8)}'s Sword`}
       </h1>
       <LinearGradient
         className={cn("text-4xl font-extrabold", CoolFont.className)}
@@ -160,7 +160,7 @@ function Content({ sword, user }: SwordProps) {
   );
 }
 
-export default function Sword({ sword, user }: SwordProps) {
+export default function Sword({ sword, username }: SwordProps) {
   return (
     <>
       {(Rarities.find((r) => r.name === sword.rarity)?.chance ?? 0) >= 336 ? (
@@ -173,10 +173,10 @@ export default function Sword({ sword, user }: SwordProps) {
             1,
           )}
         >
-          <Content user={user} sword={sword} />
+          <Content username={username} sword={sword} />
         </ShineBorder>
       ) : (
-        <Content user={user} sword={sword} />
+        <Content username={username} sword={sword} />
       )}
     </>
   );

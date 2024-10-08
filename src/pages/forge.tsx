@@ -48,7 +48,7 @@ export default function Forge() {
       <div className="container mx-auto flex flex-col items-center">
         <h1 className="text-4xl font-bold">Current Sword</h1>
         <UserStats user={user} />
-        {sword ? <SwordDisplay user={user!} sword={sword} /> : <FakeSword />}
+        {sword ? <SwordDisplay username={user?.name ?? ""} sword={sword} /> : <FakeSword />}
         <ActionButtons
           sword={sword}
           setSword={setSword}
