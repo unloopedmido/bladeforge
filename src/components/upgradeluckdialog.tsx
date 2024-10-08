@@ -65,7 +65,7 @@ export default function UpgradeLuckDialog({
   }, [currentLuck, currentMoney, calculateUpgradeCost]);
 
   // API mutation
-  const { mutate: upgradeLuck } = api.user.upgradeLuck.useMutation({
+  const { mutate: upgradeLuck, isPending } = api.user.upgradeLuck.useMutation({
     onSuccess: (data) => {
       if (data.success) {
         toast.success("Luck upgraded successfully");
@@ -169,9 +169,9 @@ export default function UpgradeLuckDialog({
         <DialogFooter>
           <Button
             onClick={handleUpgradeLuck}
-            disabled={currentMoney < moneyRequired || isButtonDisabled}
+            disabled={currentMoney < moneyRequired || isButtonDisabled || isPending}
           >
-            Upgrade Luck
+            {isPending ? "Upgrading..." : "Upgrade Luck"}
           </Button>
           <Button onClick={handleMaxLuck} disabled={maxAffordableLuck === 0}>
             Max Luck

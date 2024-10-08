@@ -24,23 +24,25 @@ export default function Blades() {
     refetchOnMount: true,
   });
 
-  const { mutate: equipSword } = api.sword.equipSword.useMutation({
-    onSuccess: (data) => {
-      if(data.success) {
-        void refetch();
-      toast.success("Sword equipped successfully");
-      } else {
-        toast.error(data.message);
-      }
-    },
-  });
+  const { mutate: equipSword, isPending: isEquipping } =
+    api.sword.equipSword.useMutation({
+      onSuccess: (data) => {
+        if (data.success) {
+          void refetch();
+          toast.success("Sword equipped successfully");
+        } else {
+          toast.error(data.message);
+        }
+      },
+    });
 
-  const { mutate: sellSword } = api.sword.sellSword.useMutation({
-    onSuccess: () => {
-      void refetch()
-      toast.success("Sword sold successfully");
-    },
-  });
+  const { mutate: sellSword, isPending: isSelling } =
+    api.sword.sellSword.useMutation({
+      onSuccess: () => {
+        void refetch();
+        toast.success("Sword sold successfully");
+      },
+    });
 
   if (isLoading) {
     return (
@@ -77,21 +79,25 @@ export default function Blades() {
                   <AlertDialogFooter>
                     <AlertDialogCancel>Cancel</AlertDialogCancel>
                     <AlertDialogAction
+                      disabled={isEquipping || isSelling}
                       onClick={() => handleEquipSword(sword.id)}
                     >
-                      Equip
+                      {isEquipping ? "Equipping..." : "Equip"}
                     </AlertDialogAction>
                     <AlertDialogAction
+                      disabled={isEquipping || isSelling}
                       onClick={() => handleSellSword(sword.id)}
                     >
-                      Sell
+                      {isSelling ? "Selling..." : "Sell"}
                     </AlertDialogAction>
                   </AlertDialogFooter>
                 </AlertDialogContent>
               </AlertDialog>
             ))
           ) : (
-            <h2 className="mt-4 text-center font-sm text-foreground/70">You do not have any swords stored</h2>
+            <h2 className="font-sm mt-4 text-center text-foreground/70">
+              You do not have any swords stored
+            </h2>
           )}
         </div>
       </div>

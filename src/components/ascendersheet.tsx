@@ -3,6 +3,7 @@ import {
   Dialog,
   DialogContent,
   DialogDescription,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
@@ -16,15 +17,21 @@ interface AscenderSheetProps {
   sword: SwordType | null;
   setSword: (sword: SwordType | null) => void;
   user: UserType | null;
+  disabled: boolean;
 }
 
 export default function AscenderSheet({
   sword,
   setSword,
   user,
+  disabled,
 }: AscenderSheetProps) {
   const [cooldown, setCooldown] = useState<number>(0);
-  const { mutate: ascend } = api.sword.ascend.useMutation({
+  const [selectedProperty, setSelectedProperty] = useState<
+    "rarity" | "quality" | "material" | null
+  >(null); // New state for selected property
+
+  const { mutate: ascend, isPending } = api.sword.ascend.useMutation({
     onSuccess: (data) => {
       toast.success(data.message);
       setSword(data.sword);
@@ -46,17 +53,23 @@ export default function AscenderSheet({
     }
   }, [cooldown]);
 
+  const handleAscend = () => {
+    if (selectedProperty) {
+      ascend(selectedProperty); // Trigger ascend with the selected property
+    }
+  };
+
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button disabled={!sword} variant="secondary">
+        <Button disabled={!sword || disabled} variant="secondary">
           Ascend Sword
         </Button>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle className="text-xl font-bold">
-            🗡 Sword Ascender
+          <DialogTitle>
+            Sword Ascender
           </DialogTitle>
           <DialogDescription>
             Upgrade your sword&apos;s properties below to increase its value and
@@ -86,28 +99,43 @@ export default function AscenderSheet({
           </div>
           <div className="flex flex-col gap-y-7">
             <Button
-              onClick={() => ascend("rarity")}
-              disabled={cooldown > 0}
-              className="w-full"
+              variant={selectedProperty === "rarity" ? "secondary" : "default"}
+              onClick={() => setSelectedProperty("rarity")}
+              className={`w-full`}
             >
               Upgrade Rarity
             </Button>
             <Button
-              onClick={() => ascend("quality")}
-              disabled={cooldown > 0}
-              className="w-full"
+              variant={selectedProperty === "quality" ? "secondary" : "default"}
+              onClick={() => setSelectedProperty("quality")}
+              className={`w-full`}
             >
               Upgrade Quality
             </Button>
             <Button
-              onClick={() => ascend("material")}
-              disabled={cooldown > 0}
-              className="w-full"
+              variant={
+                selectedProperty === "material" ? "secondary" : "default"
+              }
+              onClick={() => setSelectedProperty("material")}
+              className={`w-full`}
             >
               Upgrade Material
             </Button>
           </div>
         </div>
+        <DialogFooter>
+          <Button
+            onClick={() => handleAscend()}
+            disabled={cooldown > 0 || isPending || !selectedProperty}
+            className="w-full capitalize"
+          >
+            {cooldown > 0
+              ? `Cooldown: ${cooldown / 1000}s`
+              : isPending
+                ? "Ascending..."
+                : `Ascend ${selectedProperty}`}
+          </Button>
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   );

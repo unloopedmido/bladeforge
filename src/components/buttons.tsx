@@ -20,36 +20,39 @@ export default function ActionButtons({
   setUser,
 }: ActionButtonsProps) {
   const [cooldown, setCooldown] = useState<number>(0);
-  const { mutate: sellSword } = api.sword.sellSword.useMutation({
-    onSuccess: () => {
-      setSword(null);
-      setCooldown(user?.vip ? 2000 : 4000);
-      toast.success("Sword sold successfully");
-      if (user)
-        setUser({
-          ...user,
-          money: BigInt(user.money) + BigInt(sword?.value ?? 0),
-        });
-    },
-  });
-
-  const { mutate: generateSword } = api.sword.generateSword.useMutation({
-    onSuccess: (data) => {
-      setSword(data.sword);
-      toast.info(data.message);
-    },
-  });
-
-  const { mutate: unequipSword } = api.sword.unequipSword.useMutation({
-    onSuccess: (data) => {
-      if (data.message.includes("You can only have up to")) {
-        return toast.error(data.message);
-      } else {
+  const { mutate: sellSword, isPending: isSelling } =
+    api.sword.sellSword.useMutation({
+      onSuccess: () => {
         setSword(null);
-        toast.info("Sword stored successfully");
-      }
-    },
-  });
+        toast.success("Sword sold successfully");
+        if (user)
+          setUser({
+            ...user,
+            money: BigInt(user.money) + BigInt(sword?.value ?? 0),
+          });
+      },
+    });
+
+  const { mutate: generateSword, isPending: isGenerating } =
+    api.sword.generateSword.useMutation({
+      onSuccess: (data) => {
+        setSword(data.sword);
+        setCooldown(user?.vip ? 2000 : 4000);
+        toast.info(data.message);
+      },
+    });
+
+  const { mutate: unequipSword, isPending: isStoring } =
+    api.sword.unequipSword.useMutation({
+      onSuccess: (data) => {
+        if (data.message.includes("You can only have up to")) {
+          return toast.error(data.message);
+        } else {
+          setSword(null);
+          toast.info("Sword stored successfully");
+        }
+      },
+    });
 
   useEffect(() => {
     if (cooldown > 0) {
@@ -69,31 +72,33 @@ export default function ActionButtons({
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
         <Button
           onClick={handleGenerateSword}
-          disabled={!!sword || cooldown > 0}
+          disabled={!!sword || isGenerating || cooldown > 0}
         >
-          {sword
-            ? "Generate Sword"
-            : cooldown > 0
-              ? `Cooldown: ${cooldown / 1000}s`
-              : "Generate Sword"}
+          {isGenerating
+            ? "Generating..."
+            : sword
+              ? "Generate Sword"
+              : cooldown > 0
+                ? `Cooldown: ${cooldown / 1000}s`
+                : "Generate Sword"}
         </Button>
         <Button
           variant="destructive"
           onClick={handleSellSword}
-          disabled={!sword}
+          disabled={!sword || isSelling || isStoring}
         >
-          Sell Sword
+          {isSelling ? "Selling..." : "Sell Sword"}
         </Button>
       </div>
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
         <Button
           variant="secondary"
           onClick={handleUnequipSword}
-          disabled={!sword}
+          disabled={!sword || isStoring || isSelling}
         >
-          Store Sword
+          {isStoring ? "Storing..." : "Store Sword"}
         </Button>
-        <AscenderSheet sword={sword} user={user} setSword={setSword} />
+        <AscenderSheet disabled={isSelling || isStoring} sword={sword} user={user} setSword={setSword} />
       </div>
       <UpgradeLuckDialog user={user} setUser={setUser} />
     </div>
