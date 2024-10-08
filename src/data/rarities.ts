@@ -99,9 +99,9 @@ const Rarities: Rarity[] = [
 ].map((rarity, index) => ({
   name: rarity.name,
   color: rarity.color,
-  chance: +Math.pow(3.2, index).toFixed(2), // 320% increase per rarity level
-  valueMultiplier: +Math.pow(2.1, index).toFixed(2), // 210% increase per rarity level
-  damageMultiplier: +Math.pow(1.5, index).toFixed(2), // 50% increase per rarity level
+  chance: +Math.pow(3.6, index).toFixed(2), // 360% increase per rarity level
+  valueMultiplier: +Math.pow(1.9, index).toFixed(2), // 90% increase per rarity level
+  damageMultiplier: +Math.pow(1.45, index).toFixed(2), // 45% increase per rarity level
 }));
 
 export default Rarities;

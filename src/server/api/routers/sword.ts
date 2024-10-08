@@ -34,7 +34,7 @@ export const swordRouter = createTRPCRouter({
 
     if (lastGeneration) {
       const now = Date.now();
-      const cooldown = user?.vip ? 300000 : 600000; // 5 minutes for VIP, 10 minutes for normal members
+      const cooldown = user?.vip ? 2000 : 3000; // 2 seconds for VIP, 3 seconds for normal members (increase of 50%)
       if (now - new Date(lastGeneration).getTime() < cooldown)
         return {
           success: false,
@@ -62,7 +62,7 @@ export const swordRouter = createTRPCRouter({
 
     await ctx.db.user.update({
       where: { id: ctx.session.user.id },
-      data: { swordId: generatedSword.id },
+      data: { swordId: generatedSword.id, lastGeneration: new Date() },
     });
     return {
       success: true,
@@ -223,7 +223,7 @@ export const swordRouter = createTRPCRouter({
         });
       }
 
-      const cooldown = user.vip ? 1000 : 2000; // 1 second for VIP, 2 seconds for normal members
+      const cooldown = user.vip ? 1000 : 1500; // 1 second for VIP, 1.5 seconds for normal members
       const now = Date.now();
       const lastAscend = user.lastAscend
         ? new Date(user.lastAscend).getTime()

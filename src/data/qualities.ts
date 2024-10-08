@@ -26,9 +26,9 @@ const Qualities: Quality[] = [
   "Perfect",
 ].map((quality, index) => ({
   name: quality,
-  chance: +Math.pow(2.5, index).toFixed(2), // 250% increase per quality level
-  valueMultiplier: +Math.pow(1.8, index).toFixed(2), // 50% increase per quality level
-  damageMultiplier: +Math.pow(1.8, index).toFixed(2), // 80% increase per quality level
+  chance: +Math.pow(2.9, index).toFixed(2), // 290% increase per quality level
+  valueMultiplier: +Math.pow(1.7, index).toFixed(2), // 70% increase per quality level
+  damageMultiplier: +Math.pow(1.7, index).toFixed(2), // 70% increase per quality level
 }));
 
 export default Qualities;
