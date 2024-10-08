@@ -210,20 +210,14 @@ export const swordRouter = createTRPCRouter({
     .input(z.enum(["material", "quality", "rarity"]))
     .mutation(async ({ ctx, input }) => {
       const { user, sword } = await findUserSword(ctx);
-      if (!user) {
+      if (!user || !sword) {
         throw new TRPCError({
           code: "NOT_FOUND",
-          message: "User not found",
-        });
-      }
-      if (!sword) {
-        throw new TRPCError({
-          code: "NOT_FOUND",
-          message: "No sword equipped",
+          message: !user ? "User not found" : "No sword equipped",
         });
       }
 
-      const cooldown = user.vip ? 1000 : 2000; // 1 second for VIP, 2 seconds for normal members
+      const cooldown = user.vip ? 1000 : 2000;
       const now = Date.now();
       const lastAscend = user.lastAscend
         ? new Date(user.lastAscend).getTime()
@@ -247,12 +241,13 @@ export const swordRouter = createTRPCRouter({
         (p) => p.name === sword[ascending],
       );
 
-      const userLuck = Number(user.luck) * (user.vip ? 1.25 : 0); // VIP users get a 25% luck bonus
+      const userLuck = Number(user.luck) * (user.vip ? 1.25 : 1); // Non-VIP users now have luck applied
       const attemptedProperty = getRandomProperty(
         ascendingArray[ascending],
         userLuck,
       );
 
+      // Higher chance means better/rarer in this game
       if (attemptedProperty.chance > (currentProperty?.chance ?? 0)) {
         const newValue =
           (Number(sword.value) / (currentProperty?.valueMultiplier ?? 1)) *
@@ -281,7 +276,7 @@ export const swordRouter = createTRPCRouter({
         });
 
         return {
-          message: `Upgraded successfully! You got ${attemptedProperty.name} (1/${Math.round(attemptedProperty.chance / Number(user.luck))})`,
+          message: `Upgraded successfully! You got ${attemptedProperty.name} (1/${Math.round(attemptedProperty.chance)})`,
           sword: await ctx.db.sword.findUnique({ where: { id: sword.id } }),
         };
       }
@@ -293,7 +288,7 @@ export const swordRouter = createTRPCRouter({
 
       throw new TRPCError({
         code: "BAD_REQUEST",
-        message: `Failed to Upgrade!\nYou got ${attemptedProperty.name} (1/${Math.round(attemptedProperty.chance / Number(user.luck))})`,
+        message: `Failed to Upgrade!\nYou got ${attemptedProperty.name} (1/${Math.round(attemptedProperty.chance)})`,
       });
     }),
 });
