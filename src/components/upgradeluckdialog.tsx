@@ -10,7 +10,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Clover, DollarSign } from "lucide-react";
+import { Clover, CoinsIcon } from "lucide-react";
 import { type User as UserType } from "@prisma/client";
 import { abbreviateNumber } from "@/lib/func";
 import { api } from "@/utils/api";
@@ -159,7 +159,7 @@ export default function UpgradeLuckDialog({
           <StatusDisplay
             label="Current Money"
             value={currentMoney}
-            icon={<DollarSign />}
+            icon={<CoinsIcon />}
             colorClass="text-yellow-500"
           />
         </div>

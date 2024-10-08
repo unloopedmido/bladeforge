@@ -101,7 +101,7 @@ const Rarities: Rarity[] = [
   color: rarity.color,
   chance: +Math.pow(3.6, index).toFixed(2), // 360% increase per rarity level
   valueMultiplier: +Math.pow(1.9, index).toFixed(2), // 90% increase per rarity level
-  damageMultiplier: +Math.pow(1.45, index).toFixed(2), // 45% increase per rarity level
+  damageMultiplier: +Math.pow(2.1, index).toFixed(2), // 45% increase per rarity level
 }));
 
 export default Rarities;

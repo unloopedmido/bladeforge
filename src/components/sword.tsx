@@ -1,12 +1,12 @@
 import ShineBorder from "./ui/shine-border";
 import Rarities from "@/data/rarities";
-import { type Sword as SwordType } from "@prisma/client";
+import { type Sword as SwordType, type User as UserType } from "@prisma/client";
 import { abbreviateNumber, rgbToAlpha } from "@/lib/func";
 import { LinearGradient } from "react-text-gradients";
 import { Fredoka } from "next/font/google";
 import { cn } from "@/lib/utils";
 import Materials from "@/data/materials";
-import { DollarSign, SwordIcon } from "lucide-react";
+import { CoinsIcon, SwordIcon } from "lucide-react";
 
 const CoolFont = Fredoka({
   subsets: ["latin"],
@@ -14,13 +14,21 @@ const CoolFont = Fredoka({
 
 interface SwordProps {
   sword: SwordType;
+  user: UserType;
 }
 
-function Content({ sword }: SwordProps) {
+function Content({ sword, user }: SwordProps) {
   return (
-    <div className="relative h-[300px] w-[300px] p-3" style={sword.shiny ? {
-      boxShadow: "0 0 10px 5px rgba(255, 255, 0, 0.3)",
-    } : {}}>
+    <div
+      className="relative h-[300px] w-[300px] p-3"
+      style={
+        sword.shiny
+          ? {
+              boxShadow: "0 0 10px 5px rgba(255, 255, 0, 0.3)",
+            }
+          : {}
+      }
+    >
       {/* Background image div */}
       <div
         className="absolute inset-0 h-full w-full"
@@ -54,7 +62,7 @@ function Content({ sword }: SwordProps) {
         }}
         className={cn("text-2xl font-bold text-purple-300", CoolFont.className)}
       >
-        Your Sword
+        {`${user.name!.slice(0, 8)}'s Sword`}
       </h1>
       <LinearGradient
         className={cn("text-4xl font-extrabold", CoolFont.className)}
@@ -84,7 +92,23 @@ function Content({ sword }: SwordProps) {
       >
         {sword.quality}
       </h1>
-      <div className="mt-16 flex flex-col text-end">
+      {sword.shiny && (
+        <h1
+          style={{
+            textShadow: "2px 2px 4px rgba(255, 255, 0, 0.6)",
+            zIndex: 2, // Ensure text is above the gradient
+            position: "relative", // Establish a new stacking context for text
+          }}
+          className={cn("text-2xl font-bold", CoolFont.className)}
+        >
+          Shiny
+        </h1>
+      )}
+      <div
+        className={
+          "flex flex-col text-end" + (sword.shiny ? " mt-10" : " mt-16")
+        }
+      >
         <LinearGradient
           className={cn("text-4xl font-extrabold", CoolFont.className)}
           gradient={[
@@ -110,11 +134,11 @@ function Content({ sword }: SwordProps) {
             position: "relative", // Establish a new stacking context for text
           }}
           className={cn(
-            "flex items-center justify-end text-2xl font-bold text-green-500",
+            "flex items-center justify-end gap-x-1 text-2xl font-bold text-yellow-500",
             CoolFont.className,
           )}
         >
-          <DollarSign />
+          <CoinsIcon />
           {abbreviateNumber(Number(sword.value))}
         </h1>
         <h1
@@ -124,7 +148,7 @@ function Content({ sword }: SwordProps) {
             position: "relative", // Establish a new stacking context for text
           }}
           className={cn(
-            "flex items-center justify-end text-2xl font-bold text-red-500",
+            "flex items-center justify-end gap-x-1 text-2xl font-bold text-red-500",
             CoolFont.className,
           )}
         >
@@ -136,7 +160,7 @@ function Content({ sword }: SwordProps) {
   );
 }
 
-export default function Sword({ sword }: SwordProps) {
+export default function Sword({ sword, user }: SwordProps) {
   return (
     <>
       {(Rarities.find((r) => r.name === sword.rarity)?.chance ?? 0) >= 336 ? (
@@ -149,10 +173,10 @@ export default function Sword({ sword }: SwordProps) {
             1,
           )}
         >
-          <Content sword={sword} />
+          <Content user={user} sword={sword} />
         </ShineBorder>
       ) : (
-        <Content sword={sword} />
+        <Content user={user} sword={sword} />
       )}
     </>
   );
