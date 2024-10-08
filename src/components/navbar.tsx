@@ -69,13 +69,13 @@ export default function Navbar() {
           ))}
         </NavigationMenuList>
       </NavigationMenu>
-      {status === "authenticated" ? (
+      {status === "authenticated" && session.user.name ? (
         <div>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Avatar>
                 <AvatarImage src={session.user.image!} />
-                <AvatarFallback>{session.user.name![0]}</AvatarFallback>
+                <AvatarFallback>{session.user.name[0]}</AvatarFallback>
               </Avatar>
             </DropdownMenuTrigger>
             <DropdownMenuContent>

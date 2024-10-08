@@ -39,13 +39,31 @@ declare module "next-auth" {
  */
 export const authOptions: NextAuthOptions = {
   callbacks: {
-    session: ({ session, user }) => ({
-      ...session,
-      user: {
-        ...session.user,
-        id: user.id,
-      },
-    }),
+    session: async ({ session, user }) => {
+      // Load allowed users from environment variable
+      const allowedUsers = process.env.ALLOWED_USERS?.split(",") ?? [];
+
+      // If user's email is not in the allowed list, return a session without user details
+      if (session.user?.name && !allowedUsers.includes(session.user.name)) {
+        return {
+          ...session,
+          user: {
+            id: "", // Empty or null values to indicate blocked user session
+            name: null,
+            email: null,
+            image: null,
+          },
+        };
+      }
+
+      return {
+        ...session,
+        user: {
+          ...session.user,
+          id: user.id,
+        },
+      };
+    },
   },
   adapter: PrismaAdapter(db) as Adapter,
   providers: [
