@@ -6,7 +6,8 @@ import Qualities from "@/data/qualities";
 import Rarities from "@/data/rarities";
 import type { PrismaClient } from "@prisma/client";
 import { TRPCError } from "@trpc/server";
-import { getLevelFromExperience } from "@/lib/func";
+import { abbreviateNumber, getLevelFromExperience } from "@/lib/func";
+import { env } from "@/env";
 
 const handleError = (error: unknown, message: string) => {
   console.error(error);
@@ -263,7 +264,33 @@ export const swordRouter = createTRPCRouter({
         levelLuck,
       );
 
+      const RNGLuck = Math.round(
+        attemptedProperty.chance / (userLuck * levelLuck),
+      );
+
       if (attemptedProperty.chance > (currentProperty?.chance ?? 0)) {
+        if (RNGLuck > 2000) {
+          const webhookURI = env.DISCORD_WEBHOOK_URI;
+
+          if (webhookURI) {
+            await fetch(webhookURI, {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                embeds: [
+                  {
+                    title: `🎉 ${user.name} has found a ${attemptedProperty.name}!`,
+                    description: `Base Chance: 1/${abbreviateNumber(attemptedProperty.chance)}\nCurrent Chance: 1/${abbreviateNumber(RNGLuck)}`,
+                    timestamp: new Date().toISOString(),
+                  },
+                ],
+              }),
+            });
+          }
+        }
+
         const newValue =
           (Number(sword.value) / (currentProperty?.valueMultiplier ?? 1)) *
           attemptedProperty.valueMultiplier;
@@ -294,7 +321,7 @@ export const swordRouter = createTRPCRouter({
         });
 
         return {
-          message: `Upgraded successfully! You got ${attemptedProperty.name} (1/${Math.round(attemptedProperty.chance / (userLuck * levelLuck))})`,
+          message: `Upgraded successfully! You got ${attemptedProperty.name} (1/${abbreviateNumber(RNGLuck)})`,
           sword: await ctx.db.sword.findUnique({ where: { id: sword.id } }),
         };
       }
@@ -306,7 +333,7 @@ export const swordRouter = createTRPCRouter({
 
       throw new TRPCError({
         code: "BAD_REQUEST",
-        message: `Failed to Upgrade!\nYou got ${attemptedProperty.name} (1/${Math.round(attemptedProperty.chance / (userLuck * levelLuck))})`,
+        message: `Failed to Upgrade!\nYou got ${attemptedProperty.name} (1/${abbreviateNumber(RNGLuck)})`,
       });
     }),
 });
