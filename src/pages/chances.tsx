@@ -73,7 +73,7 @@ export default function Chances() {
 
           {/* Value Multiplier */}
           <div className="flex flex-col items-center">
-            <p className="font-medium">{abbreviateNumber(valueMultiplier)}x</p>
+            <p className="font-medium">{abbreviateNumber(valueMultiplier)}</p>
             <p className="text-xs text-muted-foreground">Value</p>
           </div>
 
@@ -81,7 +81,7 @@ export default function Chances() {
           {damageMultiplier && (
             <div className="flex flex-col items-center">
               <p className="font-medium">
-                {abbreviateNumber(damageMultiplier)}x
+                {abbreviateNumber(damageMultiplier)}
               </p>
               <p className="text-xs text-muted-foreground">Damage</p>
             </div>
