@@ -1,22 +1,12 @@
 import Layout from "@/components/layout";
 import Sword from "@/components/sword";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
+import { Button } from "@/components/ui/button";
 import { api } from "@/utils/api";
 import { useSession } from "next-auth/react";
 import { toast } from "sonner";
 
 export default function Blades() {
-  const {data:session} = useSession();
+  const { data: session } = useSession();
 
   const {
     data: swords,
@@ -48,13 +38,7 @@ export default function Blades() {
     });
 
   if (isLoading) {
-    return (
-      <Layout>
-        <div className="container mx-auto">
-          <h1 className="text-center text-4xl font-bold">Loading...</h1>
-        </div>
-      </Layout>
-    );
+    return <Layout isLoading />;
   }
 
   const handleEquipSword = (swordId: string) => equipSword(swordId);
@@ -67,35 +51,27 @@ export default function Blades() {
         <div className="mt-10 grid cursor-pointer grid-cols-1 justify-items-center gap-y-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {swords?.swords?.length ? (
             swords.swords.map((sword) => (
-              <AlertDialog key={sword.id}>
-                <AlertDialogTrigger className="text-start">
-                  <Sword username={session?.user.name ?? ""} sword={sword} />
-                </AlertDialogTrigger>
-                <AlertDialogContent>
-                  <AlertDialogHeader>
-                    <AlertDialogTitle>Manage Blade</AlertDialogTitle>
-                    <AlertDialogDescription>
-                      Here you can either sell or equip the currently selected
-                      blade
-                    </AlertDialogDescription>
-                  </AlertDialogHeader>
-                  <AlertDialogFooter>
-                    <AlertDialogCancel>Cancel</AlertDialogCancel>
-                    <AlertDialogAction
-                      disabled={isEquipping || isSelling}
-                      onClick={() => handleEquipSword(sword.id)}
-                    >
-                      {isEquipping ? "Equipping..." : "Equip"}
-                    </AlertDialogAction>
-                    <AlertDialogAction
-                      disabled={isEquipping || isSelling}
-                      onClick={() => handleSellSword(sword.id)}
-                    >
-                      {isSelling ? "Selling..." : "Sell"}
-                    </AlertDialogAction>
-                  </AlertDialogFooter>
-                </AlertDialogContent>
-              </AlertDialog>
+              <div key={sword.id} className="flex flex-col items-center">
+                <Sword username={session?.user.name ?? ""} sword={sword} />
+                <div className="mt-2 flex w-full space-x-2">
+                  <Button
+                    variant="secondary"
+                    className="w-full"
+                    disabled={isEquipping || isSelling}
+                    onClick={() => handleEquipSword(sword.id)}
+                  >
+                    {isEquipping ? "Equipping..." : "Equip"}
+                  </Button>
+                  <Button
+                    className="w-full"
+                    variant="destructive"
+                    disabled={isEquipping || isSelling}
+                    onClick={() => handleSellSword(sword.id)}
+                  >
+                    {isSelling ? "Selling..." : "Sell"}
+                  </Button>
+                </div>
+              </div>
             ))
           ) : (
             <h2 className="font-sm mt-4 text-center text-foreground/70">

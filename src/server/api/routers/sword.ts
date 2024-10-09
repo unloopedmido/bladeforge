@@ -1,4 +1,4 @@
-import { generateSword, getRandomProperty } from "@/data/common";
+import { generateSword, getRandomProperty, luckFromLevel } from "@/data/common";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
 import { z } from "zod";
 import Materials from "@/data/materials";
@@ -6,6 +6,7 @@ import Qualities from "@/data/qualities";
 import Rarities from "@/data/rarities";
 import type { PrismaClient } from "@prisma/client";
 import { TRPCError } from "@trpc/server";
+import { getLevelFromExperience } from "@/lib/func";
 
 const handleError = (error: unknown, message: string) => {
   console.error(error);
@@ -57,6 +58,7 @@ export const swordRouter = createTRPCRouter({
         ownerId: ctx.session.user.id,
         value: Math.round(sword.value),
         damage: Math.round(sword.damage),
+        experience: Math.round(sword.experience),
       },
     });
 
@@ -86,7 +88,11 @@ export const swordRouter = createTRPCRouter({
         await ctx.db.$transaction([
           ctx.db.user.update({
             where: { id: ctx.session.user.id },
-            data: { money: { increment: sword.value }, swordId: null },
+            data: {
+              money: { increment: sword.value },
+              swordId: null,
+              experience: { increment: sword.experience },
+            },
           }),
           ctx.db.sword.delete({ where: { id: input } }),
         ]);
@@ -247,10 +253,14 @@ export const swordRouter = createTRPCRouter({
         (p) => p.name === sword[ascending],
       );
 
+      const levelLuck = luckFromLevel(
+        getLevelFromExperience(Number(user.experience)),
+      );
       const userLuck = Number(user.luck) * (user.vip ? 1.25 : 1); // VIP users get a 25% luck bonus
       const attemptedProperty = getRandomProperty(
         ascendingArray[ascending],
         userLuck,
+        levelLuck,
       );
 
       if (attemptedProperty.chance > (currentProperty?.chance ?? 0)) {
@@ -281,7 +291,7 @@ export const swordRouter = createTRPCRouter({
         });
 
         return {
-          message: `Upgraded successfully! You got ${attemptedProperty.name} (1/${Math.round(attemptedProperty.chance / userLuck)})`,
+          message: `Upgraded successfully! You got ${attemptedProperty.name} (1/${Math.round(attemptedProperty.chance / (userLuck * levelLuck))})`,
           sword: await ctx.db.sword.findUnique({ where: { id: sword.id } }),
         };
       }
@@ -293,7 +303,7 @@ export const swordRouter = createTRPCRouter({
 
       throw new TRPCError({
         code: "BAD_REQUEST",
-        message: `Failed to Upgrade!\nYou got ${attemptedProperty.name} (1/${Math.round(attemptedProperty.chance / userLuck)})`,
+        message: `Failed to Upgrade!\nYou got ${attemptedProperty.name} (1/${Math.round(attemptedProperty.chance / (userLuck * levelLuck))})`,
       });
     }),
 });

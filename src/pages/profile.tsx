@@ -1,12 +1,11 @@
 export default function Profile() {
-    return (
-      <div>
-        <h1 className="text-3xl text-center font-bold">Under Construction</h1>
-        <p className="text-center text-sm text-foreground/70">
-          The following webpage is still under construction, please come back
-          later!
-        </p>
-      </div>
-    );
-  }
-  
+  return (
+    <div className="mx-auto mt-32 flex max-w-md flex-col gap-5 px-5 text-center xl:mt-80">
+      <h1 className="text-4xl font-bold">Under Construction</h1>
+      <p className="font-light text-foreground/70">
+        The following webpage is still under construction, please come back
+        later!
+      </p>
+    </div>
+  );
+}

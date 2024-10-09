@@ -127,14 +127,6 @@ export default function UpgradeLuckDialog({
   const moneyRequired = calculateUpgradeCost(currentLuck, luckIncrement);
   const maxAffordableLuck = calculateMaxAffordableLuck();
 
-  useEffect(() => {
-    console.log('currentMoney:', currentMoney);
-    console.log('moneyRequired:', moneyRequired);
-    console.log('isButtonDisabled:', isButtonDisabled);
-    console.log('isPending:', isPending);
-    console.log('luckIncrement:', luckIncrement);
-  }, [currentMoney, moneyRequired, isButtonDisabled, isPending, luckIncrement]);
-
   return (
     <Dialog>
       <DialogTrigger asChild>

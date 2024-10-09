@@ -57,8 +57,10 @@ const MyApp: AppType<{ session: Session | null }> = ({
         disableTransitionOnChange
       >
         <div className={GeistSans.className}>
-          <Navbar />
-          <Component {...pageProps} />
+          <div className="flex flex-col min-h-screen h-full">
+            <Navbar />
+            <Component {...pageProps} />
+          </div>
           <Toaster richColors />
         </div>
       </ThemeProvider>

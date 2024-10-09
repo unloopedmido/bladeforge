@@ -42,18 +42,19 @@ model Session {
 }
 
 model Sword {
-    id        String   @id @default(cuid())
-    shiny     Boolean
-    rarity    String
-    quality   String
-    material  String
-    aura      String?
-    value     BigInt
-    damage    BigInt
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
-    ownerId   String
-    owner     User     @relation(fields: [ownerId], references: [id])
+    id         String   @id @default(cuid())
+    shiny      Boolean
+    rarity     String
+    quality    String
+    material   String
+    aura       String?
+    value      BigInt
+    damage     BigInt
+    experience BigInt @default(100)
+    createdAt  DateTime @default(now())
+    updatedAt  DateTime @updatedAt
+    ownerId    String
+    owner      User     @relation(fields: [ownerId], references: [id])
 }
 
 model User {

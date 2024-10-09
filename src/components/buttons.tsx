@@ -29,6 +29,7 @@ export default function ActionButtons({
           setUser({
             ...user,
             money: BigInt(user.money) + BigInt(sword?.value ?? 0),
+            experience: BigInt(user.experience) + BigInt(sword?.experience ?? 0),
           });
       },
     });
@@ -68,7 +69,7 @@ export default function ActionButtons({
   const handleUnequipSword = () => sword && unequipSword();
 
   return (
-    <div className="mt-8 flex flex-col gap-y-4">
+    <div className="flex flex-col gap-y-2">
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
         <Button
           onClick={handleGenerateSword}

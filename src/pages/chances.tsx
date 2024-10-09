@@ -11,12 +11,17 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Rarities from "@/data/rarities"; // Has colors
 import Qualities from "@/data/qualities"; // Doesnt have colors
 import Materials from "@/data/materials"; // Has colors
-import { abbreviateNumber, rgbToAlpha } from "@/lib/func";
+import {
+  abbreviateNumber,
+  getLevelFromExperience,
+  rgbToAlpha,
+} from "@/lib/func";
 import { LinearGradient as LG } from "react-text-gradients";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { api } from "@/utils/api";
 import { useSession } from "next-auth/react";
+import { luckFromLevel } from "@/data/common";
 
 export default function Chances() {
   const { status } = useSession();
@@ -26,6 +31,15 @@ export default function Chances() {
     enabled: status === "authenticated",
   });
   const [RNG, toggleRNG] = useState(true);
+
+  if (isLoading) {
+    return (
+      <div className="mx-auto mt-32 flex max-w-md flex-col gap-5 px-5 text-center xl:mt-80">
+        <h1 className="text-4xl font-bold">Loading</h1>
+        <p className="font-light text-foreground/70">Please wait...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="container mx-auto">
@@ -82,9 +96,14 @@ export default function Chances() {
                         {RNG
                           ? abbreviateNumber(
                               Math.round(
-                                r.chance /
+                                (r.chance /
                                   (Number(data?.user?.luck ?? 1) *
-                                    (data?.user?.vip ? 1.5 : 1)),
+                                    (data?.user?.vip ? 1.5 : 1))) /
+                                  luckFromLevel(
+                                    getLevelFromExperience(
+                                      Number(data?.user?.experience),
+                                    ),
+                                  ),
                               ),
                             )
                           : abbreviateNumber(Math.round(r.chance))}
