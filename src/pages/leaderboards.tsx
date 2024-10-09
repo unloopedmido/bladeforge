@@ -65,7 +65,6 @@ export default function Leaderboards() {
   return (
     <Layout>
       <Table>
-        <TableCaption>Top 10 Users (sorted by luck)</TableCaption>
         <TableHeader>
           <TableRow>
             <TableHead>Position</TableHead>

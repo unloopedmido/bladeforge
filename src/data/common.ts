@@ -21,7 +21,7 @@ export function probability(
 }
 
 export function luckFromLevel(level: number): number {
-  return Math.pow(1.03, level); // Each level increases luck by a factor of 1.2
+  return Math.pow(1.06, level); // Each level increases luck by a factor of 1.2
 }
 
 export function getRandomProperty(
