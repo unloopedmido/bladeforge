@@ -66,6 +66,5 @@ export default function Layout({
   }
 
   // If authenticated and user name exists, render children
-  return <div className="container mx-auto mb-10 flex flex-col flex-1">{children}
-  <h1 className="absolute bottom-1 left-1 text-muted-foreground"><strong>Version:</strong> 0.1.0</h1></div>;
+  return <div className="container mx-auto mb-10 flex flex-col flex-1">{children}</div>;
 }
