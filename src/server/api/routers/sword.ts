@@ -276,12 +276,15 @@ export const swordRouter = createTRPCRouter({
               (attemptedProperty.damageMultiplier ?? 1)
             : Number(sword.damage);
 
+        const newExperience = Math.floor(newValue * 0.1);
+
         await ctx.db.sword.update({
           where: { id: sword.id },
           data: {
             [ascending]: attemptedProperty.name,
             value: Math.round(newValue),
             damage: Math.round(newDamage),
+            experience: Math.round(newExperience),
           },
         });
 
