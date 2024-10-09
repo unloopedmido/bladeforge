@@ -36,6 +36,11 @@ const Materials: Material[] = [
   },
   { name: "Glass", color: ["rgb(100,200,250)", "rgb(50,100,150)"] },
   { name: "Obsidian", color: ["rgb(20,20,20)", "rgb(40,40,40)"] },
+  { name: "Quartz", color: ["rgb(250,250,250)", "rgb(220,220,220)"] },
+  { name: "Ivory", color: ["rgb(255,255,240)", "rgb(255,250,205)"] },
+  { name: "Onyx", color: ["rgb(0,0,0)", "rgb(105,105,105)"] },
+  { name: "Bamboo", color: ["rgb(154,205,50)", "rgb(124,252,0)"] },
+  { name: "Meteorite", color: ["rgb(105,105,105)", "rgb(169,169,169)"] },
 ].map((material, index) => ({
   name: material.name,
   color: material.color,

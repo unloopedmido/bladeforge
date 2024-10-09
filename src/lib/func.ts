@@ -40,7 +40,7 @@ export function rgbToAlpha(rgb: string | string[], alpha: number): string[] {
 }
 
 export function abbreviateNumber(num: number) {
-  const SYMBOL = ["", "k", "M", "B", "T", "Q", "Qd", "Sx", "Sp", "O", "N"];
+  const SYMBOL = ["", "k", "M", "B", "T", "Q", "Qd", "Sx", "Sp", "O", "N", "D"];
   const tier = Math.log10(num) / 3 | 0;
 
   if (tier === 0) return num;
