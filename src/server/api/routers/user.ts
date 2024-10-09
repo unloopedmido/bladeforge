@@ -11,7 +11,11 @@ export const userRouter = createTRPCRouter({
     try {
       const users = await ctx.db.user.findMany({
         take: 10,
-        orderBy: { experience: "desc", luck: "desc" },
+        orderBy: [
+          {experience: "desc"},
+          {luck: "desc"},
+          {money: "desc"},
+        ],
         include: {
           swords: true,
         },
