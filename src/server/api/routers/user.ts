@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
 import { TRPCError } from "@trpc/server";
+import { totalLuck } from "@/server/util";
 
 const DIFFICULTY_MULTIPLIER = 1.18;
 const COOLDOWN_DURATION = 2000;
@@ -11,11 +12,7 @@ export const userRouter = createTRPCRouter({
     try {
       const users = await ctx.db.user.findMany({
         take: 10,
-        orderBy: [
-          {experience: "desc"},
-          {luck: "desc"},
-          {money: "desc"},
-        ],
+        orderBy: [{ experience: "desc" }, { luck: "desc" }, { money: "desc" }],
         include: {
           swords: true,
         },
@@ -34,43 +31,47 @@ export const userRouter = createTRPCRouter({
       });
     }
   }),
-  user: protectedProcedure.query(async ({ ctx }) => {
-    // Check if user is authenticated
+
+  userTotalLuck: protectedProcedure.query(async ({ ctx }) => {
     const user = await ctx.db.user.findUnique({
       where: { id: ctx.session.user.id },
     });
 
     if (!user)
-      return {
-        success: false,
+      throw new TRPCError({
+        code: "NOT_FOUND",
         message: "User not found",
-        user: null,
-      };
+      });
+
+    return await totalLuck(user);
+  }),
+
+  user: protectedProcedure.query(async ({ ctx }) => {
+    // Check if user is authenticated
+    const user = await ctx.db.user.findUnique({
+      where: { id: ctx.session.user.id },
+      include: { swords: true },
+    });
+
+    if (!user)
+      throw new TRPCError({
+        code: "NOT_FOUND",
+        message: "User not found",
+      });
 
     // Check if the user has a sword equipped
     if (user.swordId) {
-      const sword = await ctx.db.sword.findUnique({
-        where: { id: user.swordId, ownerId: user.id },
-      });
+      const sword = user.swords.find((s) => s.id === user.swordId);
 
       return {
-        success: true,
-        message: "",
+        ...user,
         user: {
-          ...user,
-          sword: sword,
+          sword,
         },
       };
     }
 
-    return {
-      success: true,
-      message: "",
-      user: {
-        ...user,
-        sword: null,
-      },
-    };
+    return user;
   }),
   upgradeLuck: protectedProcedure
     .input(z.number().int().positive())
@@ -139,18 +140,14 @@ export const userRouter = createTRPCRouter({
         });
 
         return {
-          success: true,
-          message: `Luck upgraded by ${luckIncrement}`,
           user: updatedUser,
           cost: totalCost,
-          nextUpgradeAvailable: new Date(now.getTime() + COOLDOWN_DURATION),
         };
       } catch (error) {
-        console.error("Error upgrading luck:", error);
-        if (error instanceof TRPCError) throw error;
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
           message: "An unexpected error occurred",
+          cause: error,
         });
       }
     }),

@@ -12,6 +12,7 @@ import { Button } from "./ui/button";
 import { toast } from "sonner";
 import { api } from "@/utils/api";
 import { useEffect, useState } from "react";
+import { abbreviateNumber } from "@/lib/func";
 
 interface AscenderSheetProps {
   sword: SwordType | null;
@@ -33,7 +34,11 @@ export default function AscenderSheet({
 
   const { mutate: ascend, isPending } = api.sword.ascend.useMutation({
     onSuccess: (data) => {
-      toast.success(data.message);
+      const { property, luck } = data;
+
+      toast.success(
+        `Successfully ascended to ${property.name} with chance 1/${abbreviateNumber(luck)}`,
+      );
       setSword(data.sword);
       setCooldown(user?.vip ? 1000 : 1500);
     },

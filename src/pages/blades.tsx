@@ -3,9 +3,11 @@ import Sword from "@/components/sword";
 import { Button } from "@/components/ui/button";
 import { api } from "@/utils/api";
 import { useSession } from "next-auth/react";
+import { useRouter } from "next/router";
 import { toast } from "sonner";
 
 export default function Blades() {
+  const router = useRouter();
   const { data: session } = useSession();
 
   const {
@@ -19,13 +21,11 @@ export default function Blades() {
 
   const { mutate: equipSword, isPending: isEquipping } =
     api.sword.equipSword.useMutation({
-      onSuccess: (data) => {
-        if (data.success) {
-          void refetch();
-          toast.success("Sword equipped successfully");
-        } else {
-          toast.error(data.message);
-        }
+      onSuccess: () => {
+        void router.push("/forge");
+      },
+      onError: (error) => {
+        toast.error(error.message);
       },
     });
 
@@ -33,7 +33,9 @@ export default function Blades() {
     api.sword.sellSword.useMutation({
       onSuccess: () => {
         void refetch();
-        toast.success("Sword sold successfully");
+      },
+      onError: (error) => {
+        toast.error(error.message);
       },
     });
 
@@ -49,8 +51,8 @@ export default function Blades() {
       <div className="container mx-auto mb-10">
         <h1 className="text-center text-4xl font-bold">Blades</h1>
         <div className="mt-10 grid cursor-pointer grid-cols-1 justify-items-center gap-y-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-          {swords?.swords?.length ? (
-            swords.swords.map((sword) => (
+          {swords?.length ? (
+            swords.map((sword) => (
               <div key={sword.id} className="flex flex-col items-center">
                 <Sword username={session?.user.name ?? ""} sword={sword} />
                 <div className="mt-2 flex w-full space-x-2">

@@ -3,17 +3,12 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Rarities from "@/data/rarities"; // Has colors
 import Qualities from "@/data/qualities"; // Doesn't have colors
 import Materials from "@/data/materials"; // Has colors
-import {
-  abbreviateNumber,
-  getLevelFromExperience,
-  rgbToAlpha,
-} from "@/lib/func";
+import { abbreviateNumber, rgbToAlpha } from "@/lib/func";
 import { LinearGradient as LG } from "react-text-gradients";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { api } from "@/utils/api";
 import { useSession } from "next-auth/react";
-import { luckFromLevel } from "@/data/common";
 
 export default function Chances() {
   const { status } = useSession();
@@ -22,9 +17,15 @@ export default function Chances() {
     refetchOnWindowFocus: false,
     enabled: status === "authenticated",
   });
+  const { data: userTotalLuck, isLoading: isUserTotalLuckLoading } =
+    api.user.userTotalLuck.useQuery(undefined, {
+      refetchOnMount: true,
+      refetchOnWindowFocus: false,
+      enabled: status === "authenticated",
+    });
   const [RNG, toggleRNG] = useState(true);
 
-  if (isLoading) {
+  if (isLoading || isUserTotalLuckLoading) {
     return (
       <div className="mx-auto mt-32 flex max-w-md flex-col gap-5 px-5 text-center xl:mt-80">
         <h1 className="text-4xl font-bold">Loading</h1>
@@ -40,18 +41,6 @@ export default function Chances() {
     damageMultiplier: number,
     color: string | string[],
   ) => {
-    const userLuck = Number(data?.user?.luck ?? 1);
-    const userMultiplier = data?.user?.vip ? 1.5 : 1;
-    const chanceValue = RNG
-      ? Math.round(
-          chance /
-            (userLuck * userMultiplier) /
-            luckFromLevel(
-              getLevelFromExperience(Number(data?.user?.experience)),
-            ),
-        )
-      : Math.round(chance);
-
     return (
       <Card key={name} className="flex flex-col items-center">
         <CardHeader>
@@ -67,7 +56,9 @@ export default function Chances() {
         <CardContent className="flex items-center gap-x-4">
           {/* Chance */}
           <div className="flex flex-col items-center">
-            <p className="font-medium">1/{abbreviateNumber(chanceValue)}</p>
+            <p className="font-medium">
+              1/{abbreviateNumber(chance / userTotalLuck!)}
+            </p>
             <p className="text-xs text-muted-foreground">Chance</p>
           </div>
 

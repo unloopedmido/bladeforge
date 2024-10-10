@@ -10,6 +10,9 @@ import { Clover, CoinsIcon } from "lucide-react";
 import { abbreviateNumber } from "@/lib/func";
 
 export default function Forge() {
+  const [sword, setSword] = useState<SwordType | null>(null);
+  const [user, setUser] = useState<UserType | null>(null);
+
   const {
     data: currentSword,
     isLoading,
@@ -27,12 +30,9 @@ export default function Forge() {
     },
   );
 
-  const [sword, setSword] = useState<SwordType | null>(null);
-  const [user, setUser] = useState<UserType | null>(null);
-
   useEffect(() => {
-    if (currentSword) setSword(currentSword.sword);
-    if (userData) setUser(userData.user);
+    setSword(currentSword ?? null);
+    setUser(userData ?? null);
   }, [currentSword, userData]);
 
   if (isLoading || isRefetching || isUserLoading) {

@@ -69,28 +69,13 @@ export default function UpgradeLuckDialog({
   // API mutation
   const { mutate: upgradeLuck, isPending } = api.user.upgradeLuck.useMutation({
     onSuccess: (data) => {
-      if (data.success) {
-        toast.success("Luck upgraded successfully");
-        setUser(data.user);
-        setCooldownRemaining(null); // Reset cooldown after success
-      } else {
-        toast.error(data.message);
-      }
+      toast.success("Luck upgraded successfully");
+      setUser(data.user);
+      setCooldownRemaining(2000);
     },
     onError: (error) => {
-      const remainingTimeMatch = /(\d+)/.exec(error.message); // Match the number in the message
-      const remainingTime = remainingTimeMatch
-        ? parseInt(remainingTimeMatch[0])
-        : null;
-
-      if (remainingTime) {
-        toast.error(
-          `Please wait ${remainingTime} seconds before upgrading again.`,
-        );
-        setCooldownRemaining(remainingTime); // Set cooldown time from message
-      } else {
-        toast.error("An error occurred while upgrading luck.");
-      }
+      toast.error(error.message);
+      setCooldownRemaining(2000);
     },
   });
 
@@ -163,9 +148,7 @@ export default function UpgradeLuckDialog({
           max={100}
           min={1}
           onChange={(e) =>
-            setLuckIncrement(
-              Math.min(Number(e.target.value), 100),
-            )
+            setLuckIncrement(Math.min(Number(e.target.value), 100))
           }
         />
 

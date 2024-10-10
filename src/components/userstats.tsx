@@ -67,7 +67,7 @@ export default function UserStats({ user }: UserStatsProps) {
         <div>
           <div className="mb-1 flex justify-between text-sm">
             <span>Progress to Level {nextLevel}</span>
-            <span>{Math.round(experiencePercentage)}%</span>
+            <span>{abbreviateNumber(experiencePercentage)}%</span>
           </div>
           <Progress value={experiencePercentage} className="h-2" />
         </div>

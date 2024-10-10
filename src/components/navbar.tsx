@@ -32,7 +32,7 @@ export default function Navbar() {
   });
 
   useEffect(() => {
-    if (data) setUser(data.user);
+    if (data) setUser(data);
   }, [data]);
 
   const links = [
@@ -89,7 +89,7 @@ export default function Navbar() {
           {user?.vip && (
             <HoverCard>
               <HoverCardTrigger asChild>
-                <p className="rounded-full bg-gradient-to-br from-yellow-300 to-yellow-800 px-3 py-1 text-xs font-bold text-black">
+                <p className="hidden lg:block rounded-full bg-gradient-to-br from-yellow-300 to-yellow-800 px-3 py-1 text-xs font-bold text-black">
                   VIP
                 </p>
               </HoverCardTrigger>

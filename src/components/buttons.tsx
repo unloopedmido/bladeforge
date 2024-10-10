@@ -22,36 +22,41 @@ export default function ActionButtons({
   const [cooldown, setCooldown] = useState<number>(0);
   const { mutate: sellSword, isPending: isSelling } =
     api.sword.sellSword.useMutation({
-      onSuccess: () => {
+      onSuccess: (data) => {
         setSword(null);
         toast.success("Sword sold successfully");
         if (user)
           setUser({
             ...user,
-            money: BigInt(user.money) + BigInt(sword?.value ?? 0),
-            experience: BigInt(user.experience) + BigInt(sword?.experience ?? 0),
+            money: data.money,
+            experience: data.experience,
           });
+      },
+      onError: (error) => {
+        toast.error(error.message);
       },
     });
 
   const { mutate: generateSword, isPending: isGenerating } =
     api.sword.generateSword.useMutation({
       onSuccess: (data) => {
-        setSword(data.sword);
+        setSword(data);
         setCooldown(user?.vip ? 2000 : 3000);
-        toast.info(data.message);
+        toast.info("Sword generated successfully");
+      },
+      onError: (error) => {
+        toast.error(error.message);
       },
     });
 
   const { mutate: unequipSword, isPending: isStoring } =
     api.sword.unequipSword.useMutation({
       onSuccess: (data) => {
-        if (data.message.includes("You can only have up to")) {
-          return toast.error(data.message);
-        } else {
-          setSword(null);
-          toast.info("Sword stored successfully");
-        }
+        setSword(null);
+        toast.info(`Sword stored successfully, ${data} slots remaining`);
+      },
+      onError: (error) => {
+        toast.error(error.message);
       },
     });
 
@@ -99,7 +104,12 @@ export default function ActionButtons({
         >
           {isStoring ? "Storing..." : "Store Sword"}
         </Button>
-        <AscenderSheet disabled={isSelling || isStoring} sword={sword} user={user} setSword={setSword} />
+        <AscenderSheet
+          disabled={isSelling || isStoring}
+          sword={sword}
+          user={user}
+          setSword={setSword}
+        />
       </div>
       <UpgradeLuckDialog user={user} setUser={setUser} />
     </div>
