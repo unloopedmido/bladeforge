@@ -5,7 +5,6 @@ import {
   type DefaultSession,
   type NextAuthOptions,
 } from "next-auth";
-import { type Adapter } from "next-auth/adapters";
 import DiscordProvider from "next-auth/providers/discord";
 
 import { env } from "@/env";
@@ -21,6 +20,7 @@ declare module "next-auth" {
   interface Session extends DefaultSession {
     user: DefaultSession["user"] & {
       id: string;
+      providerAccountId?: string;
       // ...other properties
       // role: UserRole;
     };
@@ -38,24 +38,17 @@ declare module "next-auth" {
  * @see https://next-auth.js.org/configuration/options
  */
 export const authOptions: NextAuthOptions = {
+  adapter: PrismaAdapter(db),
+  providers: [
+    DiscordProvider({
+      clientId: env.DISCORD_CLIENT_ID,
+      clientSecret: env.DISCORD_CLIENT_SECRET,
+      authorization: { params: { scope: "identify" } },
+    }),
+  ],
   callbacks: {
     session: async ({ session, user }) => {
-      // Load allowed users from environment variable
-      const allowedUsers = process.env.ALLOWED_USERS?.split(",") ?? [];
-
-      // If user's email is not in the allowed list, return a session without user details
-      if (session.user?.name && !allowedUsers.includes(session.user.name)) {
-        return {
-          ...session,
-          user: {
-            id: "", // Empty or null values to indicate blocked user session
-            name: null,
-            email: null,
-            image: null,
-          },
-        };
-      }
-
+      // If no account found, return the session as is
       return {
         ...session,
         user: {
@@ -65,22 +58,7 @@ export const authOptions: NextAuthOptions = {
       };
     },
   },
-  adapter: PrismaAdapter(db) as Adapter,
-  providers: [
-    DiscordProvider({
-      clientId: env.DISCORD_CLIENT_ID,
-      clientSecret: env.DISCORD_CLIENT_SECRET,
-    }),
-    /**
-     * ...add more providers here.
-     *
-     * Most other providers require a bit more work than the Discord provider. For example, the
-     * GitHub provider requires you to add the `refresh_token_expires_in` field to the Account
-     * model. Refer to the NextAuth.js docs for the provider you want to use. Example:
-     *
-     * @see https://next-auth.js.org/providers/github
-     */
-  ],
+  // ... rest of the configuration remains the same
 };
 
 /**

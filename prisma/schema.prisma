@@ -50,7 +50,7 @@ model Sword {
     aura       String?
     value      BigInt
     damage     BigInt
-    experience BigInt @default(100)
+    experience BigInt   @default(100)
     createdAt  DateTime @default(now())
     updatedAt  DateTime @updatedAt
     ownerId    String
@@ -60,14 +60,15 @@ model Sword {
 model User {
     id              String    @id @default(cuid())
     name            String?
-    email           String?   @unique
-    emailVerified   DateTime?
     image           String?
     experience      BigInt    @default(100)
     luck            BigInt    @default(1)
     money           BigInt    @default(50)
+    email           String?
+    emailVerified   Boolean?
     vip             Boolean   @default(false)
     vipUntil        DateTime?
+    booster         Boolean   @default(false)
     lastAscend      DateTime?
     lastLuckUpgrade DateTime?
     lastGeneration  DateTime?

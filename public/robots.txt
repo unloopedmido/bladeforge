@@ -1,0 +1,3 @@
+User-agent: *
+Disallow:
+Sitemap: https://cored.studio/sitemap.xml

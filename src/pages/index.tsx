@@ -36,10 +36,9 @@ export default function Home() {
       <div>
         <header className="container mx-auto mb-32 mt-44 text-center xl:mb-60">
           <h1 className="mb-4 text-4xl font-bold leading-[1.2] sm:text-5xl md:text-6xl">
-            Welcome to{" "}
             <span className="bg-gradient-to-r from-orange-500 to-purple-500 bg-clip-text text-transparent">
               BladeForge
-            </span>
+            </span> - Your Idle Factory
           </h1>
           <WordPullUp
             className="mb-8 text-xl sm:text-2xl"

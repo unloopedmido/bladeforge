@@ -1,15 +1,18 @@
-import { GeistSans } from "geist/font/sans";
-import { type Session } from "next-auth";
-import { SessionProvider } from "next-auth/react";
-import { type AppType } from "next/app";
-
-import { api } from "@/utils/api";
-
 import "@/styles/globals.css";
+import { type Session } from "next-auth";
+import { type AppType } from "next/app";
+import { api } from "@/utils/api";
+import { Montserrat } from "next/font/google";
+import { SessionProvider } from "next-auth/react";
 import { ThemeProvider } from "@/components/theme-provider";
-import Navbar from "@/components/navbar";
 import { Toaster } from "@/components/ui/sonner";
+import Navbar from "@/components/navbar";
 import Head from "next/head";
+
+const MontserratFont = Montserrat({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700", "800"],
+});
 
 const MyApp: AppType<{ session: Session | null }> = ({
   Component,
@@ -19,17 +22,17 @@ const MyApp: AppType<{ session: Session | null }> = ({
     <SessionProvider refetchOnWindowFocus={false} session={session}>
       <Head>
         <title>BladeForge - Your Idle Factory</title>
-        <meta name="title" content="BladeForge - Your Idle Factory" />
+        <meta name="title" content="BladeForge - Forge Swords and Upgrade Your Luck in This Idle Factory Game" />
         <meta
           name="description"
-          content="Generate and sell swords in BladeForge, an exciting idle factory web-based game. Upgrade your luck and explore unique sword properties!"
+          content="BladeForge is a web-based idle game where you forge unique swords, upgrade your luck, and dominate the leaderboards. Start your bladesmithing adventure today!"
         />
         <meta property="og:type" content="website" />
         <meta property="og:url" content="https://cored.studio/" />
-        <meta property="og:title" content="BladeForge - Your Idle Factory" />
+        <meta property="og:title" content="BladeForge - Forge Swords and Upgrade Your Luck in This Idle Factory Game" />
         <meta
           property="og:description"
-          content="Generate and sell swords in BladeForge, an exciting idle factory web-based game. Upgrade your luck and explore unique sword properties!"
+          content="BladeForge is a web-based idle game where you forge unique swords, upgrade your luck, and dominate the leaderboards. Start your bladesmithing adventure today!"
         />
         <meta
           property="og:image"
@@ -39,11 +42,11 @@ const MyApp: AppType<{ session: Session | null }> = ({
         <meta property="twitter:url" content="https://cored.studio" />
         <meta
           property="twitter:title"
-          content="BladeForge - Your Idle Factory"
+          content="BladeForge - Forge Swords and Upgrade Your Luck in This Idle Factory Game"
         />
         <meta
           property="twitter:description"
-          content="Generate and sell swords in BladeForge, an exciting idle factory web-based game. Upgrade your luck and explore unique sword properties!"
+          content="BladeForge is a web-based idle game where you forge unique swords, upgrade your luck, and dominate the leaderboards. Start your bladesmithing adventure today!"
         />
         <meta
           property="twitter:image"
@@ -56,8 +59,8 @@ const MyApp: AppType<{ session: Session | null }> = ({
         defaultTheme="dark"
         disableTransitionOnChange
       >
-        <div className={GeistSans.className}>
-          <div className="flex flex-col min-h-screen h-full">
+        <div className={MontserratFont.className}>
+          <div className="flex h-full min-h-screen flex-col">
             <Navbar />
             <Component {...pageProps} />
           </div>
