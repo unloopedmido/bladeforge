@@ -8,8 +8,8 @@ import {
 import { type Adapter } from "next-auth/adapters";
 import DiscordProvider from "next-auth/providers/discord";
 
-import { env } from "@/\/env";
-import { db } from "@/\/server/db";
+import { env } from "@//env";
+import { db } from "@//server/db";
 
 /**
  * Module augmentation for `next-auth` types. Allows us to add custom properties to the `session`
@@ -39,13 +39,29 @@ declare module "next-auth" {
  */
 export const authOptions: NextAuthOptions = {
   callbacks: {
-    session: ({ session, user }) => ({
-      ...session,
-      user: {
-        ...session.user,
-        id: user.id,
-      },
-    }),
+    session: ({ session, user }) => {
+      const allowedUsers = env.ALLOWED_USERS.split(",");
+
+      if(!allowedUsers.includes(session.user.name!)) {
+        return {
+          ...session,
+          user: {
+            id: "",
+            name: null,
+            email: null,
+            image: null,
+          },
+        }
+      }
+
+      return {
+        ...session,
+        user: {
+          ...session.user,
+          id: user.id,
+        },
+      };
+    },
   },
   adapter: PrismaAdapter(db) as Adapter,
   providers: [
