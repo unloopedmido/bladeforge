@@ -18,6 +18,16 @@ const config = {
     defaultLocale: "en",
   },
   transpilePackages: ["geist"],
+  redirects: async () => {
+    return [
+      {
+        source: "/(.*)",
+        has: [{ type: "host", value: "cored.studio" }],
+        destination: "https://cored.studio/:path*",
+        permanent: true,
+      },
+    ];
+  },
 };
 
 export default config;

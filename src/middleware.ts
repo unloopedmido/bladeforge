@@ -10,9 +10,12 @@ export function middleware(req: NextRequest) {
 
   // If not localhost and request is not HTTPS, redirect to HTTPS
   if (req.nextUrl.protocol !== 'https:') {
-    const httpsUrl = new URL(req.url);
-    httpsUrl.protocol = 'https:';
-    return NextResponse.redirect(httpsUrl);
+    return new Response('Redirecting...', {
+      status: 301,
+      headers: {
+        Location: `https://${hostname}${req.nextUrl.pathname}`,
+      },
+    });
   }
 
   return NextResponse.next();
