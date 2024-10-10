@@ -54,7 +54,7 @@ model Sword {
     createdAt  DateTime @default(now())
     updatedAt  DateTime @updatedAt
     ownerId    String
-    owner      User     @relation(fields: [ownerId], references: [id])
+    owner      User     @relation(fields: [ownerId], references: [id], onDelete: Cascade)
 }
 
 model User {
@@ -64,8 +64,8 @@ model User {
     experience      BigInt    @default(100)
     luck            BigInt    @default(1)
     money           BigInt    @default(50)
-    email           String?
-    emailVerified   Boolean?
+    email           String?   @unique
+    emailVerified   DateTime?
     vip             Boolean   @default(false)
     vipUntil        DateTime?
     booster         Boolean   @default(false)
