@@ -1,3 +1,8 @@
 User-agent: *
-Disallow:
+Disallow: /blades
+Disallow: /forge
+Disallow: /leaderboards
+Disallow: /chances
+Disallow: /profile
+Disallow: /settings
 Sitemap: https://cored.studio/sitemap.xml
