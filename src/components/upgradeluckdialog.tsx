@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "./ui/input";
 import {
@@ -30,10 +30,6 @@ export default function UpgradeLuckDialog({
   setUser,
 }: UpgradeLuckDialogProps) {
   const [luckIncrement, setLuckIncrement] = useState<number>(1);
-  const [cooldownRemaining, setCooldownRemaining] = useState<number | null>(
-    null,
-  );
-  const [isButtonDisabled, setIsButtonDisabled] = useState(false);
 
   // Derived state
   const currentLuck = Number(user?.luck ?? 0);
@@ -71,30 +67,11 @@ export default function UpgradeLuckDialog({
     onSuccess: (data) => {
       toast.success("Luck upgraded successfully");
       setUser(data.user);
-      setCooldownRemaining(2000);
     },
     onError: (error) => {
       toast.error(error.message);
-      setCooldownRemaining(2000);
     },
   });
-
-  // Handle cooldown countdown
-  useEffect(() => {
-    if (cooldownRemaining !== null) {
-      setIsButtonDisabled(true); // Disable button when in cooldown
-      const interval = setInterval(() => {
-        setCooldownRemaining((prev) => {
-          if (prev && prev > 1) return prev - 1;
-          clearInterval(interval);
-          setIsButtonDisabled(false); // Re-enable button when cooldown is over
-          return null;
-        });
-      }, 1000);
-
-      return () => clearInterval(interval);
-    }
-  }, [cooldownRemaining]);
 
   // Event handlers
   const handleMaxLuck = useCallback(() => {
@@ -103,10 +80,8 @@ export default function UpgradeLuckDialog({
   }, [calculateMaxAffordableLuck]);
 
   const handleUpgradeLuck = useCallback(() => {
-    if (!isButtonDisabled) {
       upgradeLuck(luckIncrement);
-    }
-  }, [luckIncrement, upgradeLuck, isButtonDisabled]);
+  }, [luckIncrement, upgradeLuck]);
 
   // Computed values
   const moneyRequired = calculateUpgradeCost(currentLuck, luckIncrement);
@@ -163,7 +138,6 @@ export default function UpgradeLuckDialog({
             onClick={handleUpgradeLuck}
             disabled={
               currentMoney < moneyRequired ||
-              isButtonDisabled ||
               isPending ||
               luckIncrement === 0
             }

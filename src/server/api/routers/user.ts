@@ -23,7 +23,8 @@ export const userRouter = createTRPCRouter({
 
       return users;
     } catch (error) {
-      console.error("Error fetching users:", error);
+      if (error instanceof TRPCError) throw error;
+      
       throw new TRPCError({
         code: "INTERNAL_SERVER_ERROR",
         message: "An unexpected error occurred",
@@ -106,7 +107,7 @@ export const userRouter = createTRPCRouter({
           );
           throw new TRPCError({
             code: "TOO_MANY_REQUESTS",
-            message: `Please wait ${remainingTime} seconds before upgrading luck again`,
+            message: `Please wait ${remainingTime} second(s) before upgrading luck again`,
             cause: { remainingTime },
           });
         }
@@ -144,6 +145,10 @@ export const userRouter = createTRPCRouter({
           cost: totalCost,
         };
       } catch (error) {
+        if (error instanceof TRPCError) {
+          throw error;
+        }
+
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
           message: "An unexpected error occurred",

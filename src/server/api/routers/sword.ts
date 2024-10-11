@@ -104,6 +104,8 @@ export const swordRouter = createTRPCRouter({
           experience: updatedUser.experience,
         };
       } catch (error) {
+        if (error instanceof TRPCError) throw error;
+
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
           message: "Failed to sell sword",
@@ -129,6 +131,8 @@ export const swordRouter = createTRPCRouter({
         });
         return sword;
       } catch (error) {
+        if (error instanceof TRPCError) throw error;
+
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
           message: "Failed to equip sword",
@@ -170,6 +174,8 @@ export const swordRouter = createTRPCRouter({
 
       return canSave;
     } catch (error) {
+      if (error instanceof TRPCError) throw error;
+
       throw new TRPCError({
         code: "INTERNAL_SERVER_ERROR",
         message: "Failed to unequip sword",
@@ -194,6 +200,8 @@ export const swordRouter = createTRPCRouter({
 
       return filteredSwords;
     } catch (error) {
+      if (error instanceof TRPCError) throw error;
+
       throw new TRPCError({
         code: "INTERNAL_SERVER_ERROR",
         message: "Failed to fetch swords",

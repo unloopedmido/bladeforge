@@ -66,7 +66,7 @@ export default function Forge() {
           </div>
         </div>
       </div>
-      <div className="mx-auto flex flex-grow items-center justify-center gap-8">
+      <div className="mx-auto flex flex-grow items-center justify-center gap-8 mb-10">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
           {sword ? (
             <SwordDisplay username={user?.name ?? ""} sword={sword} />

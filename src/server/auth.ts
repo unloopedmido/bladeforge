@@ -38,6 +38,7 @@ declare module "next-auth" {
  * @see https://next-auth.js.org/configuration/options
  */
 export const authOptions: NextAuthOptions = {
+  
   callbacks: {
     session: ({ session, user }) => {
       return {
@@ -54,6 +55,9 @@ export const authOptions: NextAuthOptions = {
     DiscordProvider({
       clientId: env.DISCORD_CLIENT_ID,
       clientSecret: env.DISCORD_CLIENT_SECRET,
+      httpOptions: {
+        timeout: 10*1000
+      }
     }),
     /**
      * ...add more providers here.
