@@ -43,13 +43,13 @@ export function abbreviateNumber(num: number) {
   const SYMBOL = ["", "k", "M", "B", "T", "Q", "Qd", "Sx", "Sp", "O", "N", "D"];
   const tier = Math.log10(num) / 3 | 0;
 
-  if (tier === 0) return num.toFixed(2);
+  if (tier === 0) return num.toFixed(1);
 
   const suffix = SYMBOL[tier];
   const scale = Math.pow(10, tier * 3);
 
   const scaled = num / scale;
-  const formatted = scaled.toFixed(2);
+  const formatted = scaled.toFixed(1);
 
   return formatted + suffix;
 }

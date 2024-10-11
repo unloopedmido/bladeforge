@@ -129,9 +129,7 @@ export default function Leaderboards() {
                           </div>
                           <div className="flex items-center text-sm">
                             <CloverIcon className="mr-2 h-4 w-4 opacity-70" />
-                            <span>
-                              {abbreviateNumber(Number(user.luck))} luck
-                            </span>
+                            <span>{Number(user.luck)} luck</span>
                           </div>
                           <div className="flex items-center text-xs text-muted-foreground">
                             <CalendarIcon className="mr-2 h-4 w-4 opacity-70" />
@@ -147,7 +145,7 @@ export default function Leaderboards() {
                 {getLevelFromExperience(Number(user.experience))}
               </TableCell>
               <TableCell>{abbreviateNumber(Number(user.money))}</TableCell>
-              <TableCell>{abbreviateNumber(Number(user.luck))}</TableCell>
+              <TableCell>{Number(user.luck)}</TableCell>
               <TableCell>{userStatus(user)}</TableCell>
             </TableRow>
           ))}

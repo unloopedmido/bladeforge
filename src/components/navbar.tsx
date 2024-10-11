@@ -37,10 +37,10 @@ export default function Navbar() {
 
   const links = [
     { title: "Home", href: "/" },
-    { title: "Forge", href: "/forge" },
-    { title: "Blades", href: "/blades" },
-    { title: "Chances", href: "/chances" },
-    { title: "Profile", href: "/profile" },
+    { title: "Forge", href: "/forge", auth: true },
+    { title: "Blades", href: "/blades", auth: true },
+    { title: "Chances", href: "/chances", auth: true },
+    { title: "Profile", href: "/profile", auth: true },
     { title: "Leaderboards", href: "/leaderboards" },
   ];
 

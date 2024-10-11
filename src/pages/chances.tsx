@@ -9,29 +9,26 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { api } from "@/utils/api";
 import { useSession } from "next-auth/react";
+import Layout from "@/components/layout";
 
 export default function Chances() {
   const { status } = useSession();
+
   const { data, isLoading } = api.user.user.useQuery(undefined, {
     refetchOnMount: true,
     refetchOnWindowFocus: false,
-    enabled: status === "authenticated",
   });
+
   const { data: userTotalLuck, isLoading: isUserTotalLuckLoading } =
     api.user.userTotalLuck.useQuery(undefined, {
       refetchOnMount: true,
       refetchOnWindowFocus: false,
-      enabled: status === "authenticated",
     });
+
   const [RNG, toggleRNG] = useState(true);
 
-  if (isLoading || isUserTotalLuckLoading) {
-    return (
-      <div className="mx-auto mt-32 flex max-w-md flex-col gap-5 px-5 text-center xl:mt-80">
-        <h1 className="text-4xl font-bold">Loading</h1>
-        <p className="font-light text-foreground/70">Please wait...</p>
-      </div>
-    );
+  if (isLoading || isUserTotalLuckLoading || status === "loading") {
+    return <Layout isLoading />;
   }
 
   const renderCardContent = (
@@ -57,7 +54,7 @@ export default function Chances() {
           {/* Chance */}
           <div className="flex flex-col items-center">
             <p className="font-medium">
-              1/{abbreviateNumber(chance / userTotalLuck!)}
+              1/{abbreviateNumber(chance / (userTotalLuck ?? 1))}
             </p>
             <p className="text-xs text-muted-foreground">Chance</p>
           </div>
@@ -83,7 +80,7 @@ export default function Chances() {
   };
 
   return (
-    <div className="container mx-auto px-4">
+    <Layout>
       {!isLoading ? (
         <>
           <h1 className="text-center text-4xl font-bold">Chances</h1>
@@ -156,6 +153,6 @@ export default function Chances() {
       ) : (
         <h1 className="text-center text-4xl font-extrabold">Loading...</h1>
       )}
-    </div>
+    </Layout>
   );
 }

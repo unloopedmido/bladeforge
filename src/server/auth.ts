@@ -40,20 +40,6 @@ declare module "next-auth" {
 export const authOptions: NextAuthOptions = {
   callbacks: {
     session: ({ session, user }) => {
-      const allowedUsers = env.ALLOWED_USERS.split(",");
-
-      if(!allowedUsers.includes(session.user.name!)) {
-        return {
-          ...session,
-          user: {
-            id: "",
-            name: null,
-            email: null,
-            image: null,
-          },
-        }
-      }
-
       return {
         ...session,
         user: {
