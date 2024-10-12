@@ -54,7 +54,6 @@ model Sword {
     material   String
     aura       String?
     effect     String?
-    shiny      Boolean  @default(false)
     enchants   String[] @default([])
     value      BigInt
     damage     BigInt
