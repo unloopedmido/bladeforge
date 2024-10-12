@@ -14,7 +14,6 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { abbreviateNumber, getLevelFromExperience } from "@/lib/func";
 import { api } from "@/utils/api";
-import type { User as UserType } from "@prisma/client";
 import { CalendarIcon, SwordIcon, CoinsIcon, CloverIcon } from "lucide-react";
 import Layout from "@/components/layout";
 
@@ -23,32 +22,6 @@ export default function Leaderboards() {
     refetchOnWindowFocus: false,
     refetchInterval: 10000,
   });
-
-  function userStatus(user: UserType) {
-    const lastAscend = user.lastAscend?.getTime();
-    const lastGeneration = user.lastGeneration?.getTime();
-    const lastUpgrade = user.lastLuckUpgrade;
-
-    const now = new Date().getTime();
-    const fiveMinutes = 5 * 60 * 1000;
-    const twoHours = 2 * 60 * 60 * 1000;
-
-    if (lastAscend && now - lastAscend < fiveMinutes) {
-      return <p className="text-green-500">Active</p>;
-    } else if (lastGeneration && now - lastGeneration < fiveMinutes) {
-      return <p className="text-green-500">Active</p>;
-    } else if (lastUpgrade && now - lastUpgrade.getTime() < fiveMinutes) {
-      return <p className="text-green-500">Active</p>;
-    } else if (lastAscend && now - lastAscend < twoHours) {
-      return <p className="text-yellow-500">Idle</p>;
-    } else if (lastGeneration && now - lastGeneration < twoHours) {
-      return <p className="text-yellow-500">Idle</p>;
-    } else if (lastUpgrade && now - lastUpgrade.getTime() < twoHours) {
-      return <p className="text-yellow-500">Idle</p>;
-    } else {
-      return <p className="text-red-500">Offline</p>;
-    }
-  }
 
   function formatDate(date: Date) {
     return new Intl.DateTimeFormat("en-US", {
@@ -71,7 +44,6 @@ export default function Leaderboards() {
             <TableHead>Level</TableHead>
             <TableHead>Money</TableHead>
             <TableHead>Luck</TableHead>
-            <TableHead>Status</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -146,7 +118,6 @@ export default function Leaderboards() {
               </TableCell>
               <TableCell>{abbreviateNumber(Number(user.money))}</TableCell>
               <TableCell>{Number(user.luck)}</TableCell>
-              <TableCell>{userStatus(user)}</TableCell>
             </TableRow>
           ))}
         </TableBody>

@@ -5,8 +5,6 @@ import Qualities from "@/data/qualities"; // Doesn't have colors
 import Materials from "@/data/materials"; // Has colors
 import { abbreviateNumber, rgbToAlpha } from "@/lib/func";
 import { LinearGradient as LG } from "react-text-gradients";
-import { useState } from "react";
-import { Button } from "@/components/ui/button";
 import { api } from "@/utils/api";
 import { useSession } from "next-auth/react";
 import Layout from "@/components/layout";
@@ -15,20 +13,13 @@ import Enchants from "@/data/enchants";
 export default function Chances() {
   const { status } = useSession();
 
-  const { data, isLoading } = api.user.user.useQuery(undefined, {
-    refetchOnMount: true,
-    refetchOnWindowFocus: false,
-  });
-
   const { data: userTotalLuck, isLoading: isUserTotalLuckLoading } =
     api.user.userTotalLuck.useQuery(undefined, {
       refetchOnMount: true,
       refetchOnWindowFocus: false,
     });
 
-  const [RNG, toggleRNG] = useState(true);
-
-  if (isLoading || isUserTotalLuckLoading || status === "loading") {
+  if (isUserTotalLuckLoading || status === "loading") {
     return <Layout isLoading />;
   }
 
@@ -82,149 +73,125 @@ export default function Chances() {
 
   return (
     <Layout>
-      {!isLoading ? (
-        <>
-          <h1 className="text-center text-4xl font-bold">Chances</h1>
-          {data && (
-            <div className="mb-10 flex justify-center">
-              <Button
-                variant="secondary"
-                className="mt-5"
-                onClick={() => toggleRNG(!RNG)}
-              >
-                {RNG ? "Disable" : "Enable"} RNG
-              </Button>
-            </div>
-          )}
+      <h1 className="text-center text-4xl font-bold">Chances</h1>
 
-          {/* Tabs for Rarities, Qualities, Materials */}
-          <Tabs className="mb-5" defaultValue="rarity">
-            <TabsList>
-              <TabsTrigger value="rarity">Rarities</TabsTrigger>
-              <TabsTrigger value="quality">Qualities</TabsTrigger>
-              <TabsTrigger value="material">Materials</TabsTrigger>
-              <TabsTrigger value="enchants">Enchants</TabsTrigger>
-            </TabsList>
+      {/* Tabs for Rarities, Qualities, Materials */}
+      <Tabs className="mb-5" defaultValue="rarity">
+        <TabsList>
+          <TabsTrigger value="rarity">Rarities</TabsTrigger>
+          <TabsTrigger value="quality">Qualities</TabsTrigger>
+          <TabsTrigger value="material">Materials</TabsTrigger>
+          <TabsTrigger value="enchants">Enchants</TabsTrigger>
+        </TabsList>
 
-            {/* Rarities */}
-            <TabsContent value="rarity">
-              <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
-                {Rarities.map((r) =>
-                  renderCardContent(
-                    r.name,
-                    r.chance,
-                    r.valueMultiplier,
-                    r.damageMultiplier,
-                    r.color,
-                  ),
-                )}
-              </div>
-            </TabsContent>
+        {/* Rarities */}
+        <TabsContent value="rarity">
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+            {Rarities.map((r) =>
+              renderCardContent(
+                r.name,
+                r.chance,
+                r.valueMultiplier,
+                r.damageMultiplier,
+                r.color,
+              ),
+            )}
+          </div>
+        </TabsContent>
 
-            {/* Qualities */}
-            <TabsContent value="quality">
-              <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
-                {Qualities.map((q) =>
-                  renderCardContent(
-                    q.name,
-                    q.chance,
-                    q.valueMultiplier,
-                    q.damageMultiplier,
-                    "rgb(255,255,255)",
-                  ),
-                )}
-              </div>
-            </TabsContent>
+        {/* Qualities */}
+        <TabsContent value="quality">
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+            {Qualities.map((q) =>
+              renderCardContent(
+                q.name,
+                q.chance,
+                q.valueMultiplier,
+                q.damageMultiplier,
+                "rgb(255,255,255)",
+              ),
+            )}
+          </div>
+        </TabsContent>
 
-            {/* Materials */}
-            <TabsContent value="material">
-              <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
-                {Materials.map((m) =>
-                  renderCardContent(
-                    m.name,
-                    m.chance,
-                    m.valueMultiplier,
-                    1, // Materials may not have a damageMultiplier
-                    m.color,
-                  ),
-                )}
-              </div>
-            </TabsContent>
+        {/* Materials */}
+        <TabsContent value="material">
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+            {Materials.map((m) =>
+              renderCardContent(
+                m.name,
+                m.chance,
+                m.valueMultiplier,
+                1, // Materials may not have a damageMultiplier
+                m.color,
+              ),
+            )}
+          </div>
+        </TabsContent>
 
-            <TabsContent value="enchants">
-              <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
-                {Enchants.map((e) => (
-                  <Card key={e.name} className="flex flex-col items-center">
-                    <CardHeader>
-                      <CardTitle>
-                        <LG
-                          gradient={[
-                            "to left",
-                            rgbToAlpha(e.color, 1).join(", "),
-                          ]}
-                          className="text-2xl font-extrabold"
-                        >
-                          {e.name}
-                        </LG>
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent className="flex items-center gap-x-4">
-                      <div className="flex flex-col items-center">
-                        <p className="font-medium">{e.chance}%</p>
-                        <p className="text-xs text-muted-foreground">Chance</p>
-                      </div>
+        <TabsContent value="enchants">
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+            {Enchants.map((e) => (
+              <Card key={e.name} className="flex flex-col items-center">
+                <CardHeader>
+                  <CardTitle>
+                    <LG
+                      gradient={["to left", rgbToAlpha(e.color, 1).join(", ")]}
+                      className="text-2xl font-extrabold"
+                    >
+                      {e.name}
+                    </LG>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="flex items-center gap-x-4">
+                  <div className="flex flex-col items-center">
+                    <p className="font-medium">{e.chance}%</p>
+                    <p className="text-xs text-muted-foreground">Chance</p>
+                  </div>
 
-                      {e.valueMultiplier > 0 && (
-                        <div className="flex flex-col items-center">
-                          <p className="font-medium">
-                            {abbreviateNumber(e.valueMultiplier)}x
-                          </p>
-                          <p className="text-xs text-muted-foreground">Value</p>
-                        </div>
-                      )}
+                  {e.valueMultiplier > 0 && (
+                    <div className="flex flex-col items-center">
+                      <p className="font-medium">
+                        {abbreviateNumber(e.valueMultiplier)}x
+                      </p>
+                      <p className="text-xs text-muted-foreground">Value</p>
+                    </div>
+                  )}
 
-                      {e.damageMultiplier > 0 && (
-                        <div className="flex flex-col items-center">
-                          <p className="font-medium">
-                            {abbreviateNumber(e.damageMultiplier)}x
-                          </p>
-                          <p className="text-xs text-muted-foreground">
-                            Damage
-                          </p>
-                        </div>
-                      )}
+                  {e.damageMultiplier > 0 && (
+                    <div className="flex flex-col items-center">
+                      <p className="font-medium">
+                        {abbreviateNumber(e.damageMultiplier)}x
+                      </p>
+                      <p className="text-xs text-muted-foreground">Damage</p>
+                    </div>
+                  )}
 
-                      {e.experienceMultiplier > 0 && (
-                        <div className="flex flex-col items-center">
-                          <p className="font-medium">
-                            {abbreviateNumber(e.experienceMultiplier)}x
-                          </p>
-                          <p className="text-xs text-muted-foreground">
-                            Experience
-                          </p>
-                        </div>
-                      )}
+                  {e.experienceMultiplier > 0 && (
+                    <div className="flex flex-col items-center">
+                      <p className="font-medium">
+                        {abbreviateNumber(e.experienceMultiplier)}x
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        Experience
+                      </p>
+                    </div>
+                  )}
 
-                      {e.luckMultiplier > 0 && (
-                        <div className="flex flex-col items-center">
-                          <p className="font-medium">
-                            {abbreviateNumber(e.luckMultiplier)}x
-                          </p>
-                          <p className="text-xs text-muted-foreground">
-                            Luck
-                          </p>
-                        </div>
-                      )}
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-            </TabsContent>
-          </Tabs>
-        </>
-      ) : (
-        <h1 className="text-center text-4xl font-extrabold">Loading...</h1>
-      )}
+                  {e.luckMultiplier > 0 && (
+                    <div className="flex flex-col items-center">
+                      <p className="font-medium">
+                        {abbreviateNumber(e.luckMultiplier)}x
+                      </p>
+                      <p className="text-xs text-muted-foreground">Luck</p>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </TabsContent>
+      </Tabs>
     </Layout>
   );
 }
