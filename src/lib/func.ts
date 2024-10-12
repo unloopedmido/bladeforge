@@ -21,7 +21,7 @@ export function getLevelFromExperience(experience: number): number {
 
 export function getExperienceForNextLevel(currentLevel: number): number {
   const baseExp = 100;
-  const levelFactor = 1.5;
+  const levelFactor = 1.35;
 
   return Math.floor(baseExp * Math.pow(levelFactor, currentLevel - 1));
 }
