@@ -65,6 +65,7 @@ export const swordRouter = createTRPCRouter({
         value: Math.round(sword.value),
         damage: Math.round(sword.damage),
         experience: Math.round(sword.experience),
+        enchants: sword.enchants?.map((enchant) => enchant.name) ?? [],
       },
     });
 

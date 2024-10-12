@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { api } from "@/utils/api";
 import { useSession } from "next-auth/react";
 import Layout from "@/components/layout";
+import Enchants from "@/data/enchants";
 
 export default function Chances() {
   const { status } = useSession();
@@ -102,6 +103,7 @@ export default function Chances() {
               <TabsTrigger value="rarity">Rarities</TabsTrigger>
               <TabsTrigger value="quality">Qualities</TabsTrigger>
               <TabsTrigger value="material">Materials</TabsTrigger>
+              <TabsTrigger value="enchants">Enchants</TabsTrigger>
             </TabsList>
 
             {/* Rarities */}
@@ -146,6 +148,76 @@ export default function Chances() {
                     m.color,
                   ),
                 )}
+              </div>
+            </TabsContent>
+
+            <TabsContent value="enchants">
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+                {Enchants.map((e) => (
+                  <Card key={e.name} className="flex flex-col items-center">
+                    <CardHeader>
+                      <CardTitle>
+                        <LG
+                          gradient={[
+                            "to left",
+                            rgbToAlpha(e.color, 1).join(", "),
+                          ]}
+                          className="text-2xl font-extrabold"
+                        >
+                          {e.name}
+                        </LG>
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="flex items-center gap-x-4">
+                      <div className="flex flex-col items-center">
+                        <p className="font-medium">{e.chance}%</p>
+                        <p className="text-xs text-muted-foreground">Chance</p>
+                      </div>
+
+                      {e.valueMultiplier > 0 && (
+                        <div className="flex flex-col items-center">
+                          <p className="font-medium">
+                            {abbreviateNumber(e.valueMultiplier)}x
+                          </p>
+                          <p className="text-xs text-muted-foreground">Value</p>
+                        </div>
+                      )}
+
+                      {e.damageMultiplier > 0 && (
+                        <div className="flex flex-col items-center">
+                          <p className="font-medium">
+                            {abbreviateNumber(e.damageMultiplier)}x
+                          </p>
+                          <p className="text-xs text-muted-foreground">
+                            Damage
+                          </p>
+                        </div>
+                      )}
+
+                      {e.experienceMultiplier > 0 && (
+                        <div className="flex flex-col items-center">
+                          <p className="font-medium">
+                            {abbreviateNumber(e.experienceMultiplier)}x
+                          </p>
+                          <p className="text-xs text-muted-foreground">
+                            Experience
+                          </p>
+                        </div>
+                      )}
+
+                      {e.luckMultiplier > 0 && (
+                        <div className="flex flex-col items-center">
+                          <p className="font-medium">
+                            {abbreviateNumber(e.luckMultiplier)}x
+                          </p>
+                          <p className="text-xs text-muted-foreground">
+                            Luck
+                          </p>
+                        </div>
+                      )}
+                    </CardContent>
+                  </Card>
+                ))}
               </div>
             </TabsContent>
           </Tabs>

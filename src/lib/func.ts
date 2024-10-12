@@ -1,11 +1,11 @@
 export function experienceForLevel(level: number): number {
-  return Math.floor(100 * Math.pow(level, 1.5)); // Level 1 requires 100 XP, increases with level^1.5
+  return Math.floor(100 * Math.pow(level, 1.35)); // Level 1 requires 100 XP, increases with level^1.3
 }
 
 export function getLevelFromExperience(experience: number): number {
   // Formula: experience required for level n is baseExp * levelFactor^(n-1)
   const baseExp = 100; // Experience needed for level 1
-  const levelFactor = 1.5; // How much more exp each level requires
+  const levelFactor = 1.35; // How much more exp each level requires
 
   let level = 1;
   let expForNextLevel = baseExp;

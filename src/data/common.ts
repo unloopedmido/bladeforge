@@ -19,13 +19,13 @@ export function weekendLuck(): number {
   return 1;
 }
 
-
-
 export function probability(chance: number, totalLuck: number) {
   return Math.random() * 100 < 100 / (chance / totalLuck);
 }
 
-
+export function nonLuckProbability(chance: number) {
+  return Math.random() * 100 < 100 / chance;
+}
 
 export function getForgingTitle(level: number): string {
   if (level > 500) return "Forging Grandmaster";
@@ -38,5 +38,3 @@ export function getForgingTitle(level: number): string {
   if (level > 5) return "Forging Adept";
   return "Forging Novice";
 }
-
-

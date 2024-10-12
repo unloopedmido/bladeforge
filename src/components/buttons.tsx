@@ -11,6 +11,7 @@ interface ActionButtonsProps {
   setSword: (sword: SwordType | null) => void;
   user: UserType | null;
   setUser: (user: UserType | null) => void;
+  refetch: () => void;
 }
 
 export default function ActionButtons({
@@ -18,11 +19,13 @@ export default function ActionButtons({
   setSword,
   user,
   setUser,
+  refetch
 }: ActionButtonsProps) {
   const [cooldown, setCooldown] = useState<number>(0);
   const { mutate: sellSword, isPending: isSelling } =
     api.sword.sellSword.useMutation({
       onSuccess: (data) => {
+        void refetch();
         setSword(null);
         toast.success("Sword sold successfully");
         if (user)
@@ -52,6 +55,7 @@ export default function ActionButtons({
   const { mutate: unequipSword, isPending: isStoring } =
     api.sword.unequipSword.useMutation({
       onSuccess: (data) => {
+        void refetch();
         setSword(null);
         toast.info(`Sword stored successfully, ${data} slots remaining`);
       },

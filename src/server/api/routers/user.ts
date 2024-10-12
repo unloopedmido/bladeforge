@@ -24,7 +24,7 @@ export const userRouter = createTRPCRouter({
       return users;
     } catch (error) {
       if (error instanceof TRPCError) throw error;
-      
+
       throw new TRPCError({
         code: "INTERNAL_SERVER_ERROR",
         message: "An unexpected error occurred",
@@ -36,6 +36,7 @@ export const userRouter = createTRPCRouter({
   userTotalLuck: protectedProcedure.query(async ({ ctx }) => {
     const user = await ctx.db.user.findUnique({
       where: { id: ctx.session.user.id },
+      include: { swords: true },
     });
 
     if (!user)

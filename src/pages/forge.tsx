@@ -15,6 +15,7 @@ export default function Forge() {
 
   const {
     data: currentSword,
+    refetch,
     isLoading,
     isRefetching,
   } = api.sword.getCurrentSword.useQuery(undefined, {
@@ -76,6 +77,7 @@ export default function Forge() {
           <div className="flex flex-col gap-y-4">
             <UserStats user={user} />
             <ActionButtons
+            refetch={refetch}
               sword={sword}
               setSword={setSword}
               user={user}

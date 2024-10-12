@@ -55,8 +55,10 @@ model Sword {
     quality    String
     material   String
     aura       String?
+    enchants   String[] @default([])
     value      BigInt
     damage     BigInt
+    luck       Float    @default(1.0)
     experience BigInt   @default(100)
     createdAt  DateTime @default(now())
     updatedAt  DateTime @updatedAt

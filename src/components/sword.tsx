@@ -7,6 +7,7 @@ import { Fredoka } from "next/font/google";
 import { cn } from "@/lib/utils";
 import Materials from "@/data/materials";
 import { CoinsIcon, SwordIcon } from "lucide-react";
+import Enchants from "@/data/enchants";
 
 const CoolFont = Fredoka({
   subsets: ["latin"],
@@ -20,7 +21,7 @@ interface SwordProps {
 function Content({ sword, username }: SwordProps) {
   return (
     <div
-      className="relative h-[300px] w-[300px] p-3"
+      className="relative flex h-[300px] w-[300px] flex-col p-3"
       style={
         sword.shiny
           ? {
@@ -33,12 +34,12 @@ function Content({ sword, username }: SwordProps) {
       <div
         className="absolute inset-0 h-full w-full"
         style={{
-          backgroundImage: `url('https://www.medievalware.com/wp-content/uploads/2021/07/larp-bastard-sword-2.png')`,
+          backgroundImage: `url('bastard.png')`,
           backgroundSize: "cover",
           backgroundPosition: "center",
           backgroundRepeat: "no-repeat",
-          opacity: 0.5, // Set image opacity here,
-          WebkitBackgroundSize: "80%",
+          opacity: 0.4, // Set image opacity here,
+          WebkitBackgroundSize: "100%",
           backgroundPositionX: "center",
           backgroundPositionY: "center",
           zIndex: 1, // Image above the gradient
@@ -53,19 +54,24 @@ function Content({ sword, username }: SwordProps) {
           zIndex: 0, // Gradient below the image
         }}
       />
-      {/* Text content */}
-      <h1
+            <h1
         style={{
           textShadow: "2px 2px 4px rgba(0, 0, 0, 0.6)",
           zIndex: 2, // Ensure text is above the gradient
           position: "relative", // Establish a new stacking context for text
         }}
-        className={cn("text-2xl font-bold text-purple-300", CoolFont.className)}
+        className={cn(
+          "mx-auto flex text-2xl font-bold text-purple-500",
+          CoolFont.className,
+        )}
       >
-        {`${username.slice(0, 8)}'s Sword`}
+        {username}&apos;s Sword
       </h1>
       <LinearGradient
-        className={cn("text-4xl font-extrabold", CoolFont.className)}
+        className={cn(
+          "text-center text-4xl font-extrabold",
+          CoolFont.className,
+        )}
         gradient={[
           "to right",
           rgbToAlpha(
@@ -88,73 +94,99 @@ function Content({ sword, username }: SwordProps) {
           zIndex: 2, // Ensure text is above the gradient
           position: "relative", // Establish a new stacking context for text
         }}
-        className={cn("text-2xl font-bold", CoolFont.className)}
+        className={cn(
+          "mx-auto flex gap-x-2 text-2xl font-bold",
+          CoolFont.className,
+        )}
       >
+        {sword.shiny && (
+          <p
+            style={{
+              textShadow: "2px 2px 4px rgba(255, 255, 0, 0.6)",
+              zIndex: 2, // Ensure text is above the gradient
+              position: "relative", // Establish a new stacking context for text
+            }}
+            className={cn("text-2xl font-bold", CoolFont.className)}
+          >
+            Shiny
+          </p>
+        )}
         {sword.quality}
       </h1>
-      {sword.shiny && (
-        <h1
-          style={{
-            textShadow: "2px 2px 4px rgba(255, 255, 0, 0.6)",
-            zIndex: 2, // Ensure text is above the gradient
-            position: "relative", // Establish a new stacking context for text
-          }}
-          className={cn("text-2xl font-bold", CoolFont.className)}
-        >
-          Shiny
-        </h1>
-      )}
-      <div
-        className={
-          "flex flex-col text-end" + (sword.shiny ? " mt-10" : " mt-16")
-        }
-      >
-        <LinearGradient
-          className={cn("text-4xl font-extrabold", CoolFont.className)}
-          gradient={[
-            "to right",
-            rgbToAlpha(
-              // eslint-disable-next-line @typescript-eslint/no-non-null-asserted-optional-chain
-              Materials.find((r) => r.name === sword.material)?.color!,
-              1,
-            ).join(", "),
-          ]}
-          style={{
-            textShadow: "2px 2px 4px rgba(0, 0, 0, 0.3)",
-            zIndex: 2, // Ensure text is above the gradient
-            position: "relative", // Establish a new stacking context for text
-          }}
-        >
-          {sword.material}
-        </LinearGradient>
-        <h1
-          style={{
-            textShadow: "2px 2px 4px rgba(0, 0, 0, 0.6)",
-            zIndex: 2, // Ensure text is above the gradient
-            position: "relative", // Establish a new stacking context for text
-          }}
-          className={cn(
-            "flex items-center justify-end gap-x-1 text-2xl font-bold text-yellow-500",
-            CoolFont.className,
-          )}
-        >
-          <CoinsIcon />
-          {abbreviateNumber(Number(sword.value))}
-        </h1>
-        <h1
-          style={{
-            textShadow: "2px 2px 4px rgba(0, 0, 0, 0.6)",
-            zIndex: 2, // Ensure text is above the gradient
-            position: "relative", // Establish a new stacking context for text
-          }}
-          className={cn(
-            "flex items-center justify-end gap-x-1 text-2xl font-bold text-red-500",
-            CoolFont.className,
-          )}
-        >
-          <SwordIcon />
-          {abbreviateNumber(Number(sword.damage))}
-        </h1>
+
+      <div className="flex justify-between px-1 h-full items-end">
+        <div className="flex flex-col text-start">
+          {sword.enchants.map((enchant) => (
+            <LinearGradient
+              key={enchant}
+              className={cn("text-2xl font-extrabold", CoolFont.className)}
+              gradient={[
+                "to right",
+                rgbToAlpha(
+                  // eslint-disable-next-line @typescript-eslint/no-non-null-asserted-optional-chain
+                  Enchants.find((e) => e.name === enchant)?.color!,
+                  1,
+                ).join(", "),
+              ]}
+              style={{
+                textShadow: "2px 2px 4px rgba(0, 0, 0, 0.3)",
+                zIndex: 2, // Ensure text is above the gradient
+                position: "relative", // Establish a new stacking context for text
+              }}
+            >
+              {enchant}
+            </LinearGradient>
+          ))}
+        </div>
+
+        <div className={"flex flex-col text-end"}>
+          <LinearGradient
+            className={cn("text-2xl font-extrabold", CoolFont.className)}
+            gradient={[
+              "to right",
+              rgbToAlpha(
+                // eslint-disable-next-line @typescript-eslint/no-non-null-asserted-optional-chain
+                Materials.find((r) => r.name === sword.material)?.color!,
+                1,
+              ).join(", "),
+            ]}
+            style={{
+              textShadow: "2px 2px 4px rgba(0, 0, 0, 0.3)",
+              zIndex: 2, // Ensure text is above the gradient
+              position: "relative", // Establish a new stacking context for text
+            }}
+          >
+            {sword.material}
+          </LinearGradient>
+          <h1
+            style={{
+              textShadow: "2px 2px 4px rgba(0, 0, 0, 0.6)",
+              zIndex: 2, // Ensure text is above the gradient
+              position: "relative", // Establish a new stacking context for text
+            }}
+            className={cn(
+              "flex items-center justify-end gap-x-1 text-2xl font-bold text-yellow-500",
+              CoolFont.className,
+            )}
+          >
+            <CoinsIcon />
+            {abbreviateNumber(Number(sword.value))}
+          </h1>
+          <h1
+            style={{
+              textShadow: "2px 2px 4px rgba(0, 0, 0, 0.6)",
+              zIndex: 2, // Ensure text is above the gradient
+              position: "relative", // Establish a new stacking context for text
+            }}
+            className={cn(
+              "flex items-center justify-end gap-x-1 text-2xl font-bold text-red-500",
+              CoolFont.className,
+            )}
+          >
+            <SwordIcon />
+            {abbreviateNumber(Number(sword.damage))}
+          </h1>
+        </div>
       </div>
     </div>
   );
