@@ -7,12 +7,23 @@ import type { PrismaClient } from "@prisma/client";
 import { TRPCError } from "@trpc/server";
 import { abbreviateNumber } from "@/lib/func";
 import { env } from "@/env";
-import { generateSword, getRandomProperty, totalLuck } from "@/server/util";
+import { generateSword, getProperty, totalLuck } from "@/server/util";
 
-const userWithSword = async (ctx: {
-  db: PrismaClient;
-  session: { user: { id: string } };
-}) => {
+const userCache = new Map<
+  string,
+  {
+    lastAscend?: Date;
+    lastGeneration?: Date;
+    lastLuckUpgrade?: Date;
+  }
+>();
+
+const userWithSword = async (
+  ctx: {
+    db: PrismaClient;
+    session: { user: { id: string } };
+  },
+) => {
   const user = await ctx.db.user.findUnique({
     where: { id: ctx.session.user.id },
     include: { swords: true },
@@ -37,16 +48,18 @@ const userWithSword = async (ctx: {
 export const swordRouter = createTRPCRouter({
   generateSword: protectedProcedure.mutation(async ({ ctx }) => {
     const { user } = await userWithSword(ctx);
-    const lastGeneration = user?.lastGeneration;
 
-    if (lastGeneration) {
-      const now = Date.now();
-      const cooldown = user?.vip ? 2000 : 3000; // 2 seconds for VIP, 3 seconds for normal members (increase of 50%)
-      if (now - new Date(lastGeneration).getTime() < cooldown)
-        throw new TRPCError({
-          code: "TOO_MANY_REQUESTS",
-          message: `Please wait ${((cooldown - (now - new Date(lastGeneration).getTime())) / 1000).toFixed(1)}s before generating a new sword`,
-        });
+    const now = Date.now();
+    const cachedUser = userCache.get(user.id);
+    const lastGeneration = cachedUser?.lastGeneration?.getTime() ?? 0;
+
+    const cooldown = user?.vip ? 2000 : 3000;
+
+    if (lastGeneration && now - lastGeneration < cooldown) {
+      throw new TRPCError({
+        code: "TOO_MANY_REQUESTS",
+        message: `Please wait ${((cooldown - (now - lastGeneration)) / 1000).toFixed(1)}s before generating a new sword`,
+      });
     }
 
     if (user?.swordId)
@@ -71,8 +84,10 @@ export const swordRouter = createTRPCRouter({
 
     await ctx.db.user.update({
       where: { id: ctx.session.user.id },
-      data: { swordId: generatedSword.id, lastGeneration: new Date() },
+      data: { swordId: generatedSword.id },
     });
+
+    userCache.set(user.id, { ...cachedUser, lastGeneration: new Date() });
 
     return generatedSword;
   }),
@@ -214,7 +229,7 @@ export const swordRouter = createTRPCRouter({
   getCurrentSword: protectedProcedure.query(async ({ ctx }) => {
     try {
       const { sword } = await userWithSword(ctx);
-      
+
       return sword;
     } catch (error) {
       throw new TRPCError({
@@ -228,10 +243,20 @@ export const swordRouter = createTRPCRouter({
   ascend: protectedProcedure
     .input(z.enum(["material", "quality", "rarity"]))
     .mutation(async ({ ctx, input }) => {
-      const now = Date.now();
-
-      // Fetch user and sword
       const { user, sword } = await userWithSword(ctx);
+
+      const now = Date.now();
+      const cachedUser = userCache.get(user.id);
+      const lastAscend = cachedUser?.lastAscend?.getTime() ?? 0;
+
+      const cooldown = user.vip ? 1000 : 1500;
+
+      if (lastAscend && now - lastAscend < cooldown) {
+        throw new TRPCError({
+          code: "TOO_MANY_REQUESTS",
+          message: `Please wait ${((cooldown - (now - lastAscend)) / 1000).toFixed(1)}s before ascending again`,
+        });
+      }
 
       if (!userWithSword) {
         throw new TRPCError({
@@ -247,17 +272,6 @@ export const swordRouter = createTRPCRouter({
         });
       }
 
-      // Check cooldown
-      const cooldown = user.vip ? 1000 : 1500;
-      const lastAscend = user.lastAscend ? user.lastAscend.getTime() : 0;
-
-      if (now - lastAscend < cooldown) {
-        throw new TRPCError({
-          code: "TOO_MANY_REQUESTS",
-          message: `Please wait ${((cooldown - (now - lastAscend)) / 1000).toFixed(1)}s before ascending again`,
-        });
-      }
-
       const ascending: "material" | "quality" | "rarity" = input;
       const ascendingArray = {
         material: Materials,
@@ -269,8 +283,10 @@ export const swordRouter = createTRPCRouter({
         (p) => p.name === sword[ascending],
       );
 
+      console.log(currentProperty);
+
       const userTotalLuck = await totalLuck(user);
-      const attemptedProperty = await getRandomProperty(
+      const attemptedProperty = await getProperty(
         ascendingArray[ascending],
         user,
       );
@@ -309,22 +325,20 @@ export const swordRouter = createTRPCRouter({
             : Number(sword.damage);
         const newExperience = Math.floor(newValue * 0.1);
 
-        // Update both user and sword in a single transaction
-        const [updatedSword] = await ctx.db.$transaction([
-          ctx.db.sword.update({
-            where: { id: sword.id },
-            data: {
-              [ascending]: attemptedProperty.name,
-              value: Math.round(newValue),
-              damage: Math.round(newDamage),
-              experience: Math.round(newExperience),
-            },
-          }),
-          ctx.db.user.update({
-            where: { id: user.id },
-            data: { lastAscend: new Date(now) },
-          }),
-        ]);
+        const updatedSword = await ctx.db.sword.update({
+          where: { id: sword.id },
+          data: {
+            [ascending]: attemptedProperty.name,
+            value: Math.round(newValue),
+            damage: Math.round(newDamage),
+            experience: Math.round(newExperience),
+          },
+        });
+
+        userCache.set(ctx.session.user.id, {
+          ...cachedUser,
+          lastAscend: new Date(),
+        });
 
         return {
           sword: updatedSword,
@@ -334,14 +348,14 @@ export const swordRouter = createTRPCRouter({
       }
 
       // Update lastAscend even if the ascension failed
-      await ctx.db.user.update({
-        where: { id: user.id },
-        data: { lastAscend: new Date(now) },
+      userCache.set(ctx.session.user.id, {
+        ...cachedUser,
+        lastAscend: new Date(),
       });
 
       throw new TRPCError({
         code: "BAD_REQUEST",
-        message: `Failed to ascend to ${attemptedProperty.name} with chance 1/${abbreviateNumber(RNGLuck)}`,
+        message: `Failed to ascend to ${attemptedProperty.name} (1/${abbreviateNumber(RNGLuck)}) as the current ${input} better or same`,
       });
     }),
 });

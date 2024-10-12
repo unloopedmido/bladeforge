@@ -19,8 +19,9 @@ export function weekendLuck(): number {
   return 1;
 }
 
-export function probability(chance: number, totalLuck: number) {
-  return Math.random() * 100 < 100 / (chance / totalLuck);
+export function probability(chance: number, totalLuck: number): boolean {
+  const pool = Math.random() * 100;
+  return pool < 100 / (chance / totalLuck);
 }
 
 export function nonLuckProbability(chance: number) {

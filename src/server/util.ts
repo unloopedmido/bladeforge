@@ -60,13 +60,12 @@ export async function totalLuck(
   );
 }
 
-export async function getRandomProperty(
+export async function getProperty(
   array: Property[],
   user: User,
   nonLuck?: boolean,
 ): Promise<Property> {
   const sortedArray = array.sort((a, b) => b.chance - a.chance);
-  let currentItem: Property = sortedArray[sortedArray.length - 1]!;
 
   const userTotalLuck = nonLuck
     ? 1
@@ -74,24 +73,22 @@ export async function getRandomProperty(
         user as Prisma.UserGetPayload<{ include: { swords: true } }>,
       );
 
-  // eslint-disable-next-line @typescript-eslint/prefer-for-of
-  for (let i = 0; i < sortedArray.length; i++) {
-    if (probability(Number(sortedArray[i]?.chance), userTotalLuck)) {
-      currentItem = sortedArray[i]!;
-      break;
+  for (const property of sortedArray) {
+    if (probability(Number(property.chance), userTotalLuck)) {
+      return property;
     }
   }
 
-  return currentItem;
+  return sortedArray[sortedArray.length - 1]!;
 }
 
 export async function generateSword(user: User) {
   const config = await globalConfig();
 
-  const material = await getRandomProperty(Materials, user);
-  const rarity = await getRandomProperty(Rarities, user);
-  const quality = await getRandomProperty(Qualities, user);
-  const aura = await getRandomProperty(Auras, user, true);
+  const material = await getProperty(Materials, user);
+  const rarity = await getProperty(Rarities, user);
+  const quality = await getProperty(Qualities, user);
+  const aura = await getProperty(Auras, user, true);
 
   const userLevel = getLevelFromExperience(Number(user.experience));
 
@@ -172,17 +169,22 @@ export async function generateSword(user: User) {
   };
 }
 
-export function getRandomEnchant() {
-  const SortedEnchants = Enchants.sort((a, b) => b.chance - a.chance);
-  let currentEnchant = SortedEnchants[SortedEnchants.length - 1]!;
+export function getRandomEnchant(): Enchant {
+  const totalChance = Enchants.reduce(
+    (sum, enchant) => sum + enchant.chance,
+    0,
+  );
+  const randomValue = Math.random() * totalChance;
+  let accumulatedChance = 0;
 
-  // eslint-disable-next-line @typescript-eslint/prefer-for-of
-  for (let i = 0; i < SortedEnchants.length; i++) {
-    if (probability(Number(SortedEnchants[i]?.chance), 1)) {
-      currentEnchant = SortedEnchants[i]!;
-      break;
+  for (const enchant of Enchants) {
+    accumulatedChance += enchant.chance;
+    if (randomValue < accumulatedChance) {
+      return enchant;
     }
   }
 
-  return currentEnchant;
+  // This line should never be reached if the chances sum up to 100%,
+  // but it's here as a fallback
+  return Enchants[Enchants.length - 1]!;
 }

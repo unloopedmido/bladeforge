@@ -7,6 +7,13 @@ const DIFFICULTY_MULTIPLIER = 1.18;
 const COOLDOWN_DURATION = 2000;
 const BASE_COST = 95;
 
+const userCache = new Map<
+  string,
+  {
+    lastLuckUpgrade?: Date
+  }
+>();
+
 export const userRouter = createTRPCRouter({
   getUsers: protectedProcedure.query(async ({ ctx }) => {
     try {
@@ -85,7 +92,6 @@ export const userRouter = createTRPCRouter({
             id: true,
             luck: true,
             money: true,
-            lastLuckUpgrade: true,
           },
         });
 
@@ -97,19 +103,14 @@ export const userRouter = createTRPCRouter({
         }
 
         // Check cooldown
-        const now = new Date();
-        const timeSinceLastUpgrade = user.lastLuckUpgrade
-          ? now.getTime() - user.lastLuckUpgrade.getTime()
-          : COOLDOWN_DURATION;
+        const now = Date.now();
+        const cachedUser = userCache.get(user.id);
+        const lastLuckUpgrade = cachedUser?.lastLuckUpgrade?.getTime() ?? 0;
 
-        if (timeSinceLastUpgrade < COOLDOWN_DURATION) {
-          const remainingTime = Math.ceil(
-            (COOLDOWN_DURATION - timeSinceLastUpgrade) / 1000,
-          );
+        if (lastLuckUpgrade && now - lastLuckUpgrade < COOLDOWN_DURATION) {
           throw new TRPCError({
             code: "TOO_MANY_REQUESTS",
-            message: `Please wait ${remainingTime} second(s) before upgrading luck again`,
-            cause: { remainingTime },
+            message: `Please wait ${((COOLDOWN_DURATION - (now - lastLuckUpgrade)) / 1000).toFixed(1)}s before generating a new sword`,
           });
         }
 
@@ -137,8 +138,11 @@ export const userRouter = createTRPCRouter({
           data: {
             money: { decrement: totalCost },
             luck: { increment: luckIncrement },
-            lastLuckUpgrade: now,
           },
+        });
+
+        userCache.set(user.id, {
+          lastLuckUpgrade: new Date(),
         });
 
         return {
