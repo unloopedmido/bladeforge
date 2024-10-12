@@ -67,14 +67,12 @@ export async function getProperty(
 ): Promise<Property> {
   const sortedArray = array.sort((a, b) => b.chance - a.chance);
 
-  const userTotalLuck = nonLuck
-    ? 1
-    : await totalLuck(
-        user as Prisma.UserGetPayload<{ include: { swords: true } }>,
-      );
+  const userTotalLuck = await totalLuck(
+    user as Prisma.UserGetPayload<{ include: { swords: true } }>,
+  );
 
   for (const property of sortedArray) {
-    if (probability(Number(property.chance), userTotalLuck)) {
+    if (probability(Number(property.chance), nonLuck ? 1 : userTotalLuck)) {
       return property;
     }
   }
@@ -88,7 +86,7 @@ export async function generateSword(user: User) {
   const material = await getProperty(Materials, user);
   const rarity = await getProperty(Rarities, user);
   const quality = await getProperty(Qualities, user);
-  const aura = await getProperty(Auras, user, true);
+  const aura = getRandomAura()
 
   const userLevel = getLevelFromExperience(Number(user.experience));
 
@@ -187,4 +185,24 @@ export function getRandomEnchant(): Enchant {
   // This line should never be reached if the chances sum up to 100%,
   // but it's here as a fallback
   return Enchants[Enchants.length - 1]!;
+}
+
+export function getRandomAura(): Property {
+  const totalChance = Auras.reduce(
+    (sum, aura) => sum + aura.chance,
+    0,
+  );
+  const randomValue = Math.random() * totalChance;
+  let accumulatedChance = 0;
+
+  for (const aura of Auras) {
+    accumulatedChance += aura.chance;
+    if (randomValue < accumulatedChance) {
+      return aura;
+    }
+  }
+
+  // This line should never be reached if the chances sum up to 100%,
+  // but it's here as a fallback
+  return Auras[Auras.length - 1]!;
 }

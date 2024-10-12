@@ -39,3 +39,20 @@ export function getForgingTitle(level: number): string {
   if (level > 5) return "Forging Adept";
   return "Forging Novice";
 }
+
+export function getSwordAura(aura: string): string {
+  switch(aura.toLowerCase()) {
+    case "fire":
+      return "fire.png";
+    case "electric":
+      return "electric.png";
+    case "glitch":
+      return "glitch.png";
+    case "wind":
+      return "wind.png";
+    case "light":
+      return "light.png";
+    default:
+      return "bastard.png";
+  }
+}

@@ -8,6 +8,7 @@ import { cn } from "@/lib/utils";
 import Materials from "@/data/materials";
 import { CoinsIcon, SwordIcon } from "lucide-react";
 import Enchants from "@/data/enchants";
+import { getSwordAura } from "@/data/common";
 
 const CoolFont = Fredoka({
   subsets: ["latin"],
@@ -34,7 +35,7 @@ function Content({ sword, username }: SwordProps) {
       <div
         className="absolute inset-0 h-full w-full"
         style={{
-          backgroundImage: `url('bastard.png')`,
+          backgroundImage: `url('${getSwordAura(sword.aura!)}')`,
           backgroundSize: "cover",
           backgroundPosition: "center",
           backgroundRepeat: "no-repeat",

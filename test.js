@@ -1,14 +1,26 @@
 const Auras = [
-	{ name: "Fire" },
-	{ name: "Ice" },
-	{ name: "Poison" },
-	{ name: "Electric" },
-	{ name: "Wind" },
-].map((aura, index) => ({
-	name: aura.name,
-	chance: +Math.pow(12, index + 2).toFixed(2), // 1200% increase per aura level
-	valueMultiplier: +Math.pow(4, index + 2).toFixed(2), // 400% increase per aura level
-	damageMultiplier: +Math.pow(5, index + 2).toFixed(2), // 400% increase per aura level
-}));
+  { name: "None", chance: 97.295, valueMultiplier: 1, damageMultiplier: 1 },
+  { name: "Fire", chance: 2, valueMultiplier: 16, damageMultiplier: 25 },
+  { name: "Ice", chance: 0.5, valueMultiplier: 64, damageMultiplier: 125 },
+  { name: "Poison", chance: 0.15, valueMultiplier: 256, damageMultiplier: 625 },
+  {
+    name: "Electric",
+    chance: 0.05,
+    valueMultiplier: 1024,
+    damageMultiplier: 3125,
+  },
+  {
+    name: "Wind",
+    chance: 0.005,
+    valueMultiplier: 4096,
+    damageMultiplier: 15625,
+  },
+];
 
-console.log(Auras)
+let totalChance = 0;
+
+for (const aura of Auras) {
+	totalChance += aura.chance;
+}
+
+console.log(100-totalChance);
