@@ -35,7 +35,7 @@ const Qualities: Quality[] = [
   "Ultimate",
 ].map((quality, index) => ({
   name: quality,
-  chance: +Math.pow(2.9, index).toFixed(2), // 290% increase per quality level
+  chance: +Math.pow(3.2, index).toFixed(2), // 320% increase per quality level
   valueMultiplier: +Math.pow(1.7, index).toFixed(2), // 70% increase per quality level
   damageMultiplier: +Math.pow(1.7, index).toFixed(2), // 70% increase per quality level
 }));

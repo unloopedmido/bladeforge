@@ -44,7 +44,7 @@ const Materials: Material[] = [
 ].map((material, index) => ({
   name: material.name,
   color: material.color,
-  chance: +Math.pow(4, index).toFixed(2), // 400% increase per material level
+  chance: +Math.pow(4.3, index).toFixed(2), // 430% increase per material level
   valueMultiplier: +Math.pow(2.1, index).toFixed(2), // 210% increase per material level
 }));
 
