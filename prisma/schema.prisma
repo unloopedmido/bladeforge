@@ -49,11 +49,12 @@ model Session {
 
 model Sword {
     id         String   @id @default(cuid())
-    shiny      Boolean
     rarity     String
     quality    String
     material   String
     aura       String?
+    effect     String?
+    shiny      Boolean  @default(false)
     enchants   String[] @default([])
     value      BigInt
     damage     BigInt
@@ -68,25 +69,25 @@ model Sword {
 }
 
 model User {
-    id              String    @id @default(cuid())
-    name            String?
-    image           String?
-    experience      BigInt    @default(100)
-    luck            BigInt    @default(1)
-    money           BigInt    @default(50)
-    email           String?   @unique
-    emailVerified   DateTime?
-    vip             Boolean   @default(false)
-    vipUntil        DateTime?
-    booster         Boolean   @default(false)
+    id            String    @id @default(cuid())
+    name          String?
+    image         String?
+    experience    BigInt    @default(100)
+    luck          BigInt    @default(1)
+    money         BigInt    @default(50)
+    email         String?   @unique
+    emailVerified DateTime?
+    vip           Boolean   @default(false)
+    vipUntil      DateTime?
+    booster       Boolean   @default(false)
     // lastAscend      DateTime?
     // lastLuckUpgrade DateTime?
     // lastGeneration  DateTime?
-    swordId         String?
-    createdAt       DateTime  @default(now())
-    accounts        Account[]
-    sessions        Session[]
-    swords          Sword[]
+    swordId       String?
+    createdAt     DateTime  @default(now())
+    accounts      Account[]
+    sessions      Session[]
+    swords        Sword[]
 
     @@index([swordId, email])
 }

@@ -9,6 +9,7 @@ import Materials from "@/data/materials";
 import { CoinsIcon, SwordIcon } from "lucide-react";
 import Enchants from "@/data/enchants";
 import { getSwordAura } from "@/data/common";
+import Effects from "@/data/effects";
 
 const CoolFont = Fredoka({
   subsets: ["latin"],
@@ -24,9 +25,9 @@ function Content({ sword, username }: SwordProps) {
     <div
       className="relative flex h-[300px] w-[300px] flex-col p-3"
       style={
-        sword.shiny
+        sword.effect
           ? {
-              boxShadow: "0 0 10px 5px rgba(255, 255, 0, 0.3)",
+              boxShadow: `0 0 10px 5px ${Effects.find((e) => e.name === sword.effect)?.color}`, // Keep the shadow effect
             }
           : {}
       }
@@ -55,7 +56,7 @@ function Content({ sword, username }: SwordProps) {
           zIndex: 0, // Gradient below the image
         }}
       />
-            <h1
+      <h1
         style={{
           textShadow: "2px 2px 4px rgba(0, 0, 0, 0.6)",
           zIndex: 2, // Ensure text is above the gradient
@@ -100,22 +101,22 @@ function Content({ sword, username }: SwordProps) {
           CoolFont.className,
         )}
       >
-        {sword.shiny && (
+        {sword.effect && (
           <p
             style={{
-              textShadow: "2px 2px 4px rgba(255, 255, 0, 0.6)",
+              textShadow: `2px 2px 4px ${sword.effect}`,
               zIndex: 2, // Ensure text is above the gradient
               position: "relative", // Establish a new stacking context for text
             }}
             className={cn("text-2xl font-bold", CoolFont.className)}
           >
-            Shiny
+            {sword.effect}
           </p>
         )}
         {sword.quality}
       </h1>
 
-      <div className="flex justify-between px-1 h-full items-end">
+      <div className="flex h-full items-end justify-between px-1">
         <div className="flex flex-col text-start">
           {sword.enchants.map((enchant) => (
             <LinearGradient

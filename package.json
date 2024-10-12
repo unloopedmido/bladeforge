@@ -37,7 +37,6 @@
     "@trpc/next": "^11.0.0-rc.446",
     "@trpc/react-query": "^11.0.0-rc.446",
     "@trpc/server": "^11.0.0-rc.446",
-    "bladeforge-alpha": ".",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.1",
     "embla-carousel-react": "^8.3.0",
@@ -59,6 +58,7 @@
   "devDependencies": {
     "@types/eslint": "^8.56.10",
     "@types/node": "^20.14.10",
+    "@types/pg": "^8.11.10",
     "@types/react": "^18.3.3",
     "@types/react-dom": "^18.3.0",
     "@typescript-eslint/eslint-plugin": "^8.1.0",

@@ -71,6 +71,14 @@ export const swordRouter = createTRPCRouter({
 
     const sword = await generateSword(user);
 
+    if(sword.aura === "None") {
+      sword.aura = undefined!;
+    }
+
+    if(sword.effect === "None") {
+      sword.effect = undefined!;
+    }
+
     const generatedSword = await ctx.db.sword.create({
       data: {
         ...sword,

@@ -12,6 +12,7 @@ import Rarities from "@/data/rarities";
 import Qualities from "@/data/qualities";
 import Auras from "@/data/auras";
 import Enchants, { type Enchant } from "@/data/enchants";
+import Effects from "@/data/effects";
 
 export async function globalConfig() {
   const config = await db.config.findFirst();
@@ -86,7 +87,8 @@ export async function generateSword(user: User) {
   const material = await getProperty(Materials, user);
   const rarity = await getProperty(Rarities, user);
   const quality = await getProperty(Qualities, user);
-  const aura = getRandomAura()
+  const aura = getRandomAura();
+  const effect = getRandomEffect();
 
   const userLevel = getLevelFromExperience(Number(user.experience));
 
@@ -101,13 +103,13 @@ export async function generateSword(user: User) {
 
     if (userLevel < 10) {
       return [];
-    } else if (userLevel > 110) {
+    } else if (userLevel >= 110) {
       addUniqueEnchants(4);
-    } else if (userLevel > 75) {
+    } else if (userLevel >= 75) {
       addUniqueEnchants(3);
-    } else if (userLevel > 25) {
+    } else if (userLevel >= 25) {
       addUniqueEnchants(2);
-    } else if (userLevel > 10) {
+    } else if (userLevel >= 10) {
       addUniqueEnchants(1);
     }
 
@@ -128,14 +130,12 @@ export async function generateSword(user: User) {
     enchantValue += enchant.valueMultiplier;
   });
 
-  const shiny = Math.random() < 0.25; // 25% chance of being shiny
-
   const value = Math.floor(
     (material?.valueMultiplier ?? 1) *
       (rarity?.valueMultiplier ?? 1) *
       (quality?.valueMultiplier ?? 1) *
       (aura?.valueMultiplier ?? 1) *
-      (shiny ? 1.5 : 1) *
+      effect.valueMultiplier *
       config.valueMultiplier *
       (enchantValue || 1),
   );
@@ -144,7 +144,7 @@ export async function generateSword(user: User) {
     (rarity?.damageMultiplier ?? 1) *
       (quality?.damageMultiplier ?? 1) *
       (aura?.damageMultiplier ?? 1) *
-      (shiny ? 1.5 : 1) *
+      (effect.damageMultiplier ?? 1) *
       (enchantDamage || 1),
   );
 
@@ -158,7 +158,7 @@ export async function generateSword(user: User) {
     rarity: rarity?.name,
     quality: quality?.name,
     aura: aura?.name,
-    shiny,
+    effect: effect.name,
     value,
     damage,
     luck: enchantLuck || 1,
@@ -188,10 +188,7 @@ export function getRandomEnchant(): Enchant {
 }
 
 export function getRandomAura(): Property {
-  const totalChance = Auras.reduce(
-    (sum, aura) => sum + aura.chance,
-    0,
-  );
+  const totalChance = Auras.reduce((sum, aura) => sum + aura.chance, 0);
   const randomValue = Math.random() * totalChance;
   let accumulatedChance = 0;
 
@@ -205,4 +202,21 @@ export function getRandomAura(): Property {
   // This line should never be reached if the chances sum up to 100%,
   // but it's here as a fallback
   return Auras[Auras.length - 1]!;
+}
+
+export function getRandomEffect(): Property {
+  const totalChance = Effects.reduce((sum, effect) => sum + effect.chance, 0);
+  const randomValue = Math.random() * totalChance;
+  let accumulatedChance = 0;
+
+  for (const effect of Effects) {
+    accumulatedChance += effect.chance;
+    if (randomValue < accumulatedChance) {
+      return effect;
+    }
+  }
+
+  // This line should never be reached if the chances sum up to 100%,
+  // but it's here as a fallback
+  return Effects[Effects.length - 1]!;
 }

@@ -41,6 +41,8 @@ export function getForgingTitle(level: number): string {
 }
 
 export function getSwordAura(aura: string): string {
+  if(!aura) return "bastard.png";
+
   switch(aura.toLowerCase()) {
     case "fire":
       return "fire.png";
