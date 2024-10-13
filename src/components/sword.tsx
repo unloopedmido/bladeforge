@@ -172,7 +172,7 @@ function Content({ sword, username }: SwordProps) {
             )}
           >
             <CoinsIcon />
-            {abbreviateNumber(Number(sword.value))}
+            {abbreviateNumber(sword.value)}
           </h1>
           <h1
             style={{
@@ -186,7 +186,7 @@ function Content({ sword, username }: SwordProps) {
             )}
           >
             <SwordIcon />
-            {abbreviateNumber(Number(sword.damage))}
+            {abbreviateNumber(sword.damage)}
           </h1>
         </div>
       </div>

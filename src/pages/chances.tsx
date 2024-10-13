@@ -9,6 +9,8 @@ import { api } from "@/utils/api";
 import { useSession } from "next-auth/react";
 import Layout from "@/components/layout";
 import Enchants from "@/data/enchants";
+import Auras from "@/data/auras";
+import Effects from "@/data/effects";
 
 export default function Chances() {
   const { status } = useSession();
@@ -46,14 +48,16 @@ export default function Chances() {
           {/* Chance */}
           <div className="flex flex-col items-center">
             <p className="font-medium">
-              1/{abbreviateNumber(chance / (userTotalLuck ?? 1))}
+              1/{abbreviateNumber(String(chance / (userTotalLuck ?? 1)))}
             </p>
             <p className="text-xs text-muted-foreground">Chance</p>
           </div>
 
           {/* Value Multiplier */}
           <div className="flex flex-col items-center">
-            <p className="font-medium">{abbreviateNumber(valueMultiplier)}</p>
+            <p className="font-medium">
+              {abbreviateNumber(String(valueMultiplier))}
+            </p>
             <p className="text-xs text-muted-foreground">Value</p>
           </div>
 
@@ -61,7 +65,7 @@ export default function Chances() {
           {damageMultiplier && (
             <div className="flex flex-col items-center">
               <p className="font-medium">
-                {abbreviateNumber(damageMultiplier)}
+                {abbreviateNumber(String(damageMultiplier))}
               </p>
               <p className="text-xs text-muted-foreground">Damage</p>
             </div>
@@ -82,6 +86,8 @@ export default function Chances() {
           <TabsTrigger value="quality">Qualities</TabsTrigger>
           <TabsTrigger value="material">Materials</TabsTrigger>
           <TabsTrigger value="enchants">Enchants</TabsTrigger>
+          <TabsTrigger value="auras">Auras</TabsTrigger>
+          <TabsTrigger value="effects">Effects</TabsTrigger>
         </TabsList>
 
         {/* Rarities */}
@@ -132,7 +138,7 @@ export default function Chances() {
         <TabsContent value="enchants">
           {[1, 2, 3, 4, 5, 6].map((tier) => (
             <>
-              <h1 className="text-center text-2xl mb-1 mt-1 font-bold">
+              <h1 className="mb-1 mt-1 text-center text-2xl font-bold">
                 Tier {tier}
               </h1>
               <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
@@ -160,7 +166,7 @@ export default function Chances() {
                       {e.valueMultiplier > 0 && (
                         <div className="flex flex-col items-center">
                           <p className="font-medium">
-                            {abbreviateNumber(e.valueMultiplier)}x
+                            {abbreviateNumber(String(e.valueMultiplier))}x
                           </p>
                           <p className="text-xs text-muted-foreground">Value</p>
                         </div>
@@ -169,7 +175,7 @@ export default function Chances() {
                       {e.damageMultiplier > 0 && (
                         <div className="flex flex-col items-center">
                           <p className="font-medium">
-                            {abbreviateNumber(e.damageMultiplier)}x
+                            {abbreviateNumber(String(e.damageMultiplier))}x
                           </p>
                           <p className="text-xs text-muted-foreground">
                             Damage
@@ -180,7 +186,7 @@ export default function Chances() {
                       {e.experienceMultiplier > 0 && (
                         <div className="flex flex-col items-center">
                           <p className="font-medium">
-                            {abbreviateNumber(e.experienceMultiplier)}x
+                            {abbreviateNumber(String(e.experienceMultiplier))}x
                           </p>
                           <p className="text-xs text-muted-foreground">
                             Experience
@@ -191,7 +197,7 @@ export default function Chances() {
                       {e.luckMultiplier > 0 && (
                         <div className="flex flex-col items-center">
                           <p className="font-medium">
-                            {abbreviateNumber(e.luckMultiplier)}x
+                            {abbreviateNumber(String(e.luckMultiplier))}x
                           </p>
                           <p className="text-xs text-muted-foreground">Luck</p>
                         </div>
@@ -202,6 +208,92 @@ export default function Chances() {
               </div>
             </>
           ))}
+        </TabsContent>
+
+        <TabsContent value="auras">
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+            {Auras.filter((a) => a.valueMultiplier > 1)
+              .sort((a, b) => b.chance - a.chance)
+              .map((e) => (
+                <Card key={e.name} className="flex flex-col items-center">
+                  <CardHeader>
+                    <CardTitle>
+                      <LG
+                        gradient={[
+                          "to left",
+                          rgbToAlpha(e.color, 1).join(", "),
+                        ]}
+                        className="text-2xl font-extrabold"
+                      >
+                        {e.name}
+                      </LG>{" "}
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="flex items-center gap-x-4">
+                    <div className="flex flex-col items-center">
+                      <p className="font-medium">{e.chance}%</p>
+                      <p className="text-xs text-muted-foreground">Chance</p>
+                    </div>
+
+                    <div className="flex flex-col items-center">
+                      <p className="font-medium">
+                        {abbreviateNumber(String(e.valueMultiplier))}
+                      </p>
+                      <p className="text-xs text-muted-foreground">Value</p>
+                    </div>
+                    <div className="flex flex-col items-center">
+                      <p className="font-medium">
+                        {abbreviateNumber(String(e.damageMultiplier))}
+                      </p>
+                      <p className="text-xs text-muted-foreground">Damage</p>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+          </div>
+        </TabsContent>
+
+        <TabsContent value="effects">
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+            {Effects.filter((e) => e.valueMultiplier > 1)
+              .sort((a, b) => b.chance - a.chance)
+              .map((e) => (
+                <Card key={e.name} className="flex flex-col items-center">
+                  <CardHeader>
+                    <CardTitle>
+                      <LG
+                        gradient={[
+                          "to left",
+                          rgbToAlpha(e.color, 1).join(", "),
+                        ]}
+                        className="text-2xl font-extrabold"
+                      >
+                        {e.name}
+                      </LG>
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="flex items-center gap-x-4">
+                    <div className="flex flex-col items-center">
+                      <p className="font-medium">{e.chance}%</p>
+                      <p className="text-xs text-muted-foreground">Chance</p>
+                    </div>
+
+                    <div className="flex flex-col items-center">
+                      <p className="font-medium">
+                        {abbreviateNumber(String(e.valueMultiplier))}
+                      </p>
+                      <p className="text-xs text-muted-foreground">Value</p>
+                    </div>
+                    <div className="flex flex-col items-center">
+                      <p className="font-medium">
+                        {abbreviateNumber(String(e.damageMultiplier))}
+                      </p>
+                      <p className="text-xs text-muted-foreground">Damage</p>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+          </div>
         </TabsContent>
       </Tabs>
     </Layout>

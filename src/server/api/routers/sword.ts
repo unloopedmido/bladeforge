@@ -18,12 +18,10 @@ const userCache = new Map<
   }
 >();
 
-const userWithSword = async (
-  ctx: {
-    db: PrismaClient;
-    session: { user: { id: string } };
-  },
-) => {
+const userWithSword = async (ctx: {
+  db: PrismaClient;
+  session: { user: { id: string } };
+}) => {
   const user = await ctx.db.user.findUnique({
     where: { id: ctx.session.user.id },
     include: { swords: true },
@@ -39,10 +37,21 @@ const userWithSword = async (
   if (user?.swordId) {
     const sword = user.swords.find((s) => s.id === user.swordId);
 
-    return { user, sword };
+    if (!sword)
+      throw new TRPCError({
+        code: "NOT_FOUND",
+        message: "Sword not found",
+      });
+
+    return {
+      user,
+      sword,
+    };
   }
 
-  return { user };
+  return {
+    user,
+  };
 };
 
 export const swordRouter = createTRPCRouter({
@@ -53,7 +62,7 @@ export const swordRouter = createTRPCRouter({
     const cachedUser = userCache.get(user.id);
     const lastGeneration = cachedUser?.lastGeneration?.getTime() ?? 0;
 
-    const cooldown = user?.vip ? 2000 : 3000;
+    const cooldown = user?.vip ? 1000 : 2000;
 
     if (lastGeneration && now - lastGeneration < cooldown) {
       throw new TRPCError({
@@ -71,11 +80,11 @@ export const swordRouter = createTRPCRouter({
 
     const sword = await generateSword(user);
 
-    if(sword.aura === "None") {
+    if (sword.aura === "None") {
       sword.aura = undefined!;
     }
 
-    if(sword.effect === "None") {
+    if (sword.effect === "None") {
       sword.effect = undefined!;
     }
 
@@ -83,8 +92,8 @@ export const swordRouter = createTRPCRouter({
       data: {
         ...sword,
         ownerId: ctx.session.user.id,
-        value: Math.round(sword.value),
-        damage: Math.round(sword.damage),
+        value: String(sword.value),
+        damage: String(sword.damage),
         experience: Math.round(sword.experience),
         enchants: sword.enchants?.map((enchant) => enchant.name) ?? [],
       },
@@ -105,6 +114,8 @@ export const swordRouter = createTRPCRouter({
     .mutation(async ({ ctx, input }) => {
       try {
         const sword = await ctx.db.sword.findUnique({ where: { id: input } });
+        const { user } = await userWithSword(ctx);
+
         if (!sword || sword.ownerId !== ctx.session.user.id)
           throw new TRPCError({
             code: "NOT_FOUND",
@@ -115,7 +126,7 @@ export const swordRouter = createTRPCRouter({
           ctx.db.user.update({
             where: { id: ctx.session.user.id },
             data: {
-              money: { increment: sword.value },
+              money: String(BigInt(user.money) + BigInt(sword.value)),
               swordId: null,
               experience: { increment: sword.experience },
             },
@@ -257,7 +268,7 @@ export const swordRouter = createTRPCRouter({
       const cachedUser = userCache.get(user.id);
       const lastAscend = cachedUser?.lastAscend?.getTime() ?? 0;
 
-      const cooldown = user.vip ? 1000 : 1500;
+      const cooldown = user.vip ? 500 : 1000;
 
       if (lastAscend && now - lastAscend < cooldown) {
         throw new TRPCError({
@@ -291,8 +302,6 @@ export const swordRouter = createTRPCRouter({
         (p) => p.name === sword[ascending],
       );
 
-      console.log(currentProperty);
-
       const userTotalLuck = await totalLuck(user);
       const attemptedProperty = await getProperty(
         ascendingArray[ascending],
@@ -312,7 +321,7 @@ export const swordRouter = createTRPCRouter({
                 embeds: [
                   {
                     title: `🎉 ${user.name} has found a ${attemptedProperty.name}!`,
-                    description: `Base Chance: 1/${abbreviateNumber(attemptedProperty.chance)}\nCurrent Chance: 1/${abbreviateNumber(RNGLuck)}`,
+                    description: `Base Chance: 1/${abbreviateNumber(String(attemptedProperty.chance))}\nCurrent Chance: 1/${abbreviateNumber(String(RNGLuck))}`,
                     timestamp: new Date().toISOString(),
                   },
                 ],
@@ -337,8 +346,8 @@ export const swordRouter = createTRPCRouter({
           where: { id: sword.id },
           data: {
             [ascending]: attemptedProperty.name,
-            value: Math.round(newValue),
-            damage: Math.round(newDamage),
+            value: String(Math.round(newValue)),
+            damage: String(Math.round(newDamage)),
             experience: Math.round(newExperience),
           },
         });
@@ -363,7 +372,7 @@ export const swordRouter = createTRPCRouter({
 
       throw new TRPCError({
         code: "BAD_REQUEST",
-        message: `Failed to ascend to ${attemptedProperty.name} (1/${abbreviateNumber(RNGLuck)}) as the current ${input} better or same`,
+        message: `Failed to ascend to ${attemptedProperty.name} (1/${abbreviateNumber(String(RNGLuck))}) as the current ${input} better or same`,
       });
     }),
 });

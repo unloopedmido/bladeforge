@@ -10,11 +10,35 @@ const BASE_COST = 95;
 const userCache = new Map<
   string,
   {
-    lastLuckUpgrade?: Date
+    lastLuckUpgrade?: Date;
   }
 >();
 
 export const userRouter = createTRPCRouter({
+  getAllUsers: protectedProcedure.query(async ({ ctx }) => {
+    try {
+      const users = await ctx.db.user.findMany({
+        orderBy: [{ experience: "desc" }, { luck: "desc" }, { money: "desc" }],
+        include: {
+          swords: true,
+        },
+        where: {
+          luck: { not: BigInt(1) || 1 },
+        },
+      });
+
+      return users;
+    } catch (error) {
+      if (error instanceof TRPCError) throw error;
+
+      throw new TRPCError({
+        code: "INTERNAL_SERVER_ERROR",
+        message: "An unexpected error occurred",
+        cause: error,
+      });
+    }
+  }),
+  
   getUsers: protectedProcedure.query(async ({ ctx }) => {
     try {
       const users = await ctx.db.user.findMany({
@@ -54,6 +78,36 @@ export const userRouter = createTRPCRouter({
 
     return await totalLuck(user);
   }),
+
+  getUser: protectedProcedure
+    .input(z.string())
+    .query(async ({ ctx, input }) => {
+      // Check if user is authenticated
+      const user = await ctx.db.user.findUnique({
+        where: { id: input },
+        include: { swords: true },
+      });
+
+      if (!user)
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "User not found",
+        });
+
+      // Check if the user has a sword equipped
+      if (user.swordId) {
+        const sword = user.swords.find((s) => s.id === user.swordId);
+
+        return {
+          ...user,
+          user: {
+            sword,
+          },
+        };
+      }
+
+      return user;
+    }),
 
   user: protectedProcedure.query(async ({ ctx }) => {
     // Check if user is authenticated
@@ -136,7 +190,7 @@ export const userRouter = createTRPCRouter({
         const updatedUser = await ctx.db.user.update({
           where: { id: user.id },
           data: {
-            money: { decrement: totalCost },
+            money: String(Math.round(parseInt(user.money) - totalCost)),
             luck: { increment: luckIncrement },
           },
         });

@@ -32,7 +32,7 @@ export async function totalLuck(
   user: Prisma.UserGetPayload<{ include: { swords: true } }>,
 ): Promise<number> {
   const level = getLevelFromExperience(Number(user.experience));
-  const vip = user.vip ? 1.25 : 1;
+  const vip = user.vip ? 1.3 : 1;
   const levelLuck = luckFromLevel(level);
   const userLuck = Number(user.luck);
   const weekend = weekendLuck();

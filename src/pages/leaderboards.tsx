@@ -89,9 +89,7 @@ export default function Leaderboards() {
                         <div className="space-y-2 pt-2">
                           <div className="flex items-center text-sm">
                             <CoinsIcon className="mr-2 h-4 w-4 opacity-70" />
-                            <span>
-                              {abbreviateNumber(Number(user.money))} coins
-                            </span>
+                            <span>{abbreviateNumber(user.money)} coins</span>
                           </div>
                           <div className="flex items-center text-sm">
                             <SwordIcon className="mr-2 h-4 w-4 opacity-70" />
@@ -116,7 +114,7 @@ export default function Leaderboards() {
               <TableCell>
                 {getLevelFromExperience(Number(user.experience))}
               </TableCell>
-              <TableCell>{abbreviateNumber(Number(user.money))}</TableCell>
+              <TableCell>{abbreviateNumber(user.money)}</TableCell>
               <TableCell>{Number(user.luck)}</TableCell>
             </TableRow>
           ))}

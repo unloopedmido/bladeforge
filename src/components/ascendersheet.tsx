@@ -37,14 +37,14 @@ export default function AscenderSheet({
       const { property, luck } = data;
 
       toast.success(
-        `Successfully ascended to ${property.name} with chance 1/${abbreviateNumber(luck)}`,
+        `Successfully ascended to ${property.name} with chance 1/${abbreviateNumber(String(luck))}`,
       );
       setSword(data.sword);
-      setCooldown(user?.vip ? 1000 : 1500);
+      setCooldown(user?.vip ? 500 : 1000);
     },
     onError: (error) => {
       toast.error(error.message);
-      setCooldown(user?.vip ? 1000 : 1500);
+      setCooldown(user?.vip ? 500 : 1000);
     },
   });
 

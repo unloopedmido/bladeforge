@@ -39,19 +39,21 @@ export function rgbToAlpha(rgb: string | string[], alpha: number): string[] {
   }
 }
 
-export function abbreviateNumber(num: number) {
+export function abbreviateNumber(string: string) {
+  console.log(string);
+  const num = parseInt(string);
   if (num < 1) return num.toFixed(1);
 
   const SYMBOL = ["", "k", "M", "B", "T", "Q", "Qn", "Sx", "Sp", "O", "N", "D"];
-  const tier = Math.log10(num) / 3 | 0;
+  const tier = (Math.log10(num) / 3) | 0;
 
-  if (tier === 0) return num.toFixed(1);
+  if (tier === 0) return num.toFixed(2);
 
   const suffix = SYMBOL[tier];
   const scale = Math.pow(10, tier * 3);
 
   const scaled = num / scale;
-  const formatted = scaled.toFixed(1);
+  const formatted = scaled.toFixed(2);
 
   return formatted + suffix;
 }

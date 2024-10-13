@@ -80,7 +80,7 @@ export default function UpgradeLuckDialog({
   }, [calculateMaxAffordableLuck]);
 
   const handleUpgradeLuck = useCallback(() => {
-      upgradeLuck(luckIncrement);
+    upgradeLuck(luckIncrement);
   }, [luckIncrement, upgradeLuck]);
 
   // Computed values
@@ -129,7 +129,7 @@ export default function UpgradeLuckDialog({
 
         {moneyRequired > 0 && (
           <p className="text-sm text-gray-500">
-            Cost: ${abbreviateNumber(moneyRequired)}
+            Cost: ${abbreviateNumber(String(moneyRequired))}
           </p>
         )}
 
@@ -137,9 +137,7 @@ export default function UpgradeLuckDialog({
           <Button
             onClick={handleUpgradeLuck}
             disabled={
-              currentMoney < moneyRequired ||
-              isPending ||
-              luckIncrement === 0
+              currentMoney < moneyRequired || isPending || luckIncrement === 0
             }
           >
             {isPending ? "Upgrading..." : "Upgrade Luck"}
@@ -175,7 +173,7 @@ function StatusDisplay({
         className={`flex items-center gap-x-1 text-sm font-light ${colorClass}`}
       >
         {icon}
-        <strong>{abbreviateNumber(value)}</strong>
+        <strong>{abbreviateNumber(String(value))}</strong>
       </p>
     </div>
   );

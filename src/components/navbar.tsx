@@ -35,16 +35,17 @@ export default function Navbar() {
     if (data) setUser(data);
   }, [data]);
 
+  const { status, data: session } = useSession();
+
   const links = [
     { title: "Home", href: "/" },
     { title: "Forge", href: "/forge", auth: true },
     { title: "Blades", href: "/blades", auth: true },
     { title: "Chances", href: "/chances", auth: true },
-    { title: "Profile", href: "/profile", auth: true },
     { title: "Leaderboards", href: "/leaderboards" },
   ];
 
-  const { status, data: session } = useSession();
+  const isAuthenticated = status === "authenticated";
 
   return (
     <nav className="container mx-auto mb-10 flex items-center justify-between p-3">
@@ -60,11 +61,24 @@ export default function Navbar() {
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent>
-          {links.map((link) => (
-            <DropdownMenuItem key={link.title} asChild>
-              <Link href={link.href}>{link.title}</Link>
-            </DropdownMenuItem>
-          ))}
+          {links.map(
+            (link) =>
+              (!link.auth || isAuthenticated) && (
+                <DropdownMenuItem key={link.title} asChild>
+                  <Link href={link.href}>{link.title}</Link>
+                </DropdownMenuItem>
+              ),
+          )}
+          {isAuthenticated && (
+            <>
+              <DropdownMenuItem asChild>
+                <Link href={`/profiles/${user?.id}`}>Profile</Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <Link href="/vip">VIP</Link>
+              </DropdownMenuItem>
+            </>
+          )}
         </DropdownMenuContent>
       </DropdownMenu>
       <Link href="/" className="flex items-center text-xl font-bold">
@@ -73,23 +87,42 @@ export default function Navbar() {
       </Link>
       <NavigationMenu className="hidden lg:block">
         <NavigationMenuList>
-          {links.map((link) => (
-            <NavigationMenuItem key={link.title}>
-              <Link href={link.href} legacyBehavior passHref>
+          {links.map(
+            (link) =>
+              (!link.auth || isAuthenticated) && (
+                <NavigationMenuItem key={link.title}>
+                  <Link href={link.href} legacyBehavior passHref>
+                    <NavigationMenuLink
+                      className={navigationMenuTriggerStyle()}
+                    >
+                      {link.title}
+                    </NavigationMenuLink>
+                  </Link>
+                </NavigationMenuItem>
+              ),
+          )}
+          {isAuthenticated && (
+            <NavigationMenuItem>
+              <Link href={`/profiles/${user?.id}`} legacyBehavior passHref>
                 <NavigationMenuLink className={navigationMenuTriggerStyle()}>
-                  {link.title}
+                  Profile
+                </NavigationMenuLink>
+              </Link>
+              <Link href="/vip" legacyBehavior passHref>
+                <NavigationMenuLink className={navigationMenuTriggerStyle()}>
+                  VIP
                 </NavigationMenuLink>
               </Link>
             </NavigationMenuItem>
-          ))}
+          )}
         </NavigationMenuList>
       </NavigationMenu>
-      {status === "authenticated" && session.user.name && !isLoading ? (
+      {isAuthenticated && session.user.name && !isLoading ? (
         <div className="flex items-center gap-x-2">
           {user?.vip && (
             <HoverCard>
               <HoverCardTrigger asChild>
-                <p className="hidden lg:block rounded-full bg-gradient-to-br from-yellow-300 to-yellow-800 px-3 py-1 text-xs font-bold text-black">
+                <p className="hidden rounded-full bg-gradient-to-br from-yellow-300 to-yellow-800 px-3 py-1 text-xs font-bold text-black lg:block">
                   VIP
                 </p>
               </HoverCardTrigger>
@@ -98,13 +131,13 @@ export default function Navbar() {
                   <ul className="space-y-1.5 text-sm text-foreground/80">
                     <li>
                       <strong className="font-semibold text-white">
-                        25% Luck Boost:
+                        30% Luck Boost:
                       </strong>{" "}
                       Increase your chances of forging rare and powerful swords.
                     </li>
                     <li>
                       <strong className="font-semibold text-white">
-                        50% Faster Ascension Speed:
+                        Halfed Ascension Speeds and Generation Speeds:
                       </strong>{" "}
                       Climb the ranks faster and show off your skills.
                     </li>
@@ -135,10 +168,10 @@ export default function Navbar() {
               </Avatar>
             </DropdownMenuTrigger>
             <DropdownMenuContent>
-              <DropdownMenuLabel>@{session.user.name}</DropdownMenuLabel>{" "}
+              <DropdownMenuLabel>@{session.user.name}</DropdownMenuLabel>
               <DropdownMenuSeparator />
               <DropdownMenuItem asChild>
-                <Link href="/profile">Profile</Link>
+                <Link href={`/profiles/${user?.id}`}>Profile</Link>
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem asChild>

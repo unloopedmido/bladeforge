@@ -41,7 +41,7 @@ export default function ActionButtons({
     api.sword.generateSword.useMutation({
       onSuccess: (data) => {
         setSword(data);
-        setCooldown(user?.vip ? 2000 : 3000);
+        setCooldown(user?.vip ? 1000 : 2000);
         toast.info("Sword generated successfully");
       },
       onError: (error) => {

@@ -49,7 +49,7 @@ export default function Forge() {
           </div>
           <div>
             <p className="font-medium">
-              {abbreviateNumber(Number(user?.money))}
+              {abbreviateNumber(String(user?.money))}
             </p>
             <p className="text-xs text-muted-foreground">Gold</p>
           </div>
@@ -60,7 +60,7 @@ export default function Forge() {
           </div>
           <div>
             <p className="font-medium">
-              {abbreviateNumber(Number(user?.luck))}
+              {abbreviateNumber(String(user?.luck))}
             </p>
             <p className="text-xs text-muted-foreground">Luck</p>
           </div>

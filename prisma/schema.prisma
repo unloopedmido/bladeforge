@@ -55,8 +55,8 @@ model Sword {
     aura       String?
     effect     String?
     enchants   String[] @default([])
-    value      BigInt
-    damage     BigInt
+    value      String
+    damage     String
     luck       Float    @default(1.0)
     experience BigInt   @default(100)
     createdAt  DateTime @default(now())
@@ -73,15 +73,11 @@ model User {
     image         String?
     experience    BigInt    @default(100)
     luck          BigInt    @default(1)
-    money         BigInt    @default(50)
+    money         String    @default("50")
     email         String?   @unique
     emailVerified DateTime?
     vip           Boolean   @default(false)
-    vipUntil      DateTime?
     booster       Boolean   @default(false)
-    // lastAscend      DateTime?
-    // lastLuckUpgrade DateTime?
-    // lastGeneration  DateTime?
     swordId       String?
     createdAt     DateTime  @default(now())
     accounts      Account[]
