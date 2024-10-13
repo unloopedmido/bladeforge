@@ -41,6 +41,13 @@ const Materials: Material[] = [
   { name: "Onyx", color: ["rgb(0,0,0)", "rgb(105,105,105)"] },
   { name: "Bamboo", color: ["rgb(154,205,50)", "rgb(124,252,0)"] },
   { name: "Meteorite", color: ["rgb(105,105,105)", "rgb(169,169,169)"] },
+  { name: "Bismuth", color: ["rgb(153,50,204)", "rgb(255,105,180)"] }, // New Material
+  { name: "Cobalt", color: ["rgb(0,71,171)", "rgb(66,66,66)"] }, // New Material
+  { name: "Tungsten", color: ["rgb(169,169,169)", "rgb(119,136,153)"] }, // New Material
+  { name: "Graphene", color: ["rgb(0,0,0)", "rgb(50,50,50)"] }, // New Material
+  { name: "Silver", color: ["rgb(192,192,192)", "rgb(255,255,255)"] }, // New Material
+  { name: "Mythril", color: ["rgb(160,160,255)", "rgb(255,255,255)"] }, // New Material
+  { name: "Aetherium", color: ["rgb(100,149,237)", "rgb(135,206,250)"] }, // New Material
 ].map((material, index) => ({
   name: material.name,
   color: material.color,

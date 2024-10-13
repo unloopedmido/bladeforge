@@ -6,6 +6,7 @@ export type Quality = {
 };
 
 const Qualities: Quality[] = [
+  "Inferior",
   "Ruined",
   "Broken",
   "Damaged",
@@ -17,15 +18,18 @@ const Qualities: Quality[] = [
   "Good",
   "Fine",
   "Very Good",
+  "Impressive", // New Quality
+  "Remarkable", // New Quality
   "Great",
   "Superb",
   "Excellent",
   "Outstanding",
+  "Exceptional", // New Quality
   "Pristine",
   "Flawless",
   "Perfect",
-  "Masterwork",
   "Legendary",
+  "Divine", // New Quality
   "Godly",
   "Otherworldly",
   "Ascended",
@@ -33,6 +37,7 @@ const Qualities: Quality[] = [
   "Exquisite",
   "Unparalleled",
   "Ultimate",
+  "Mythical" // New Quality
 ].map((quality, index) => ({
   name: quality,
   chance: +Math.pow(3.2, index).toFixed(2), // 320% increase per quality level
