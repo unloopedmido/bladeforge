@@ -48,21 +48,21 @@ model Session {
 }
 
 model Sword {
-    id         String   @id @default(cuid())
-    rarity     String
-    quality    String
-    material   String
-    aura       String?
-    effect     String?
-    enchants   String[] @default([])
-    value      String
-    damage     String
-    luck       Float    @default(1.0)
-    experience BigInt   @default(100)
-    createdAt  DateTime @default(now())
-    updatedAt  DateTime @updatedAt
-    ownerId    String
-    owner      User     @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+    id            String   @id @default(cuid())
+    rarity        String
+    quality       String
+    material      String
+    aura          String?
+    effect        String?
+    enchants      String[] @default([])
+    value         String
+    damage        String
+    luck          Float    @default(1.0)
+    experience    String   @default("100")
+    createdAt     DateTime @default(now())
+    updatedAt     DateTime @updatedAt
+    ownerId       String
+    owner         User     @relation(fields: [ownerId], references: [id], onDelete: Cascade)
 
     @@index([ownerId])
 }
@@ -71,7 +71,7 @@ model User {
     id            String    @id @default(cuid())
     name          String?
     image         String?
-    experience    BigInt    @default(100)
+    experience    String    @default("100")
     luck          BigInt    @default(1)
     money         String    @default("50")
     email         String?   @unique

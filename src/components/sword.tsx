@@ -36,7 +36,7 @@ function Content({ sword, username }: SwordProps) {
       <div
         className="absolute inset-0 h-full w-full"
         style={{
-          backgroundImage: `url('${getSwordAura(sword.aura!)}')`,
+          backgroundImage: `url('../${getSwordAura(sword.aura!)}')`,
           backgroundSize: "cover",
           backgroundPosition: "center",
           backgroundRepeat: "no-repeat",

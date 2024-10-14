@@ -94,7 +94,7 @@ export const swordRouter = createTRPCRouter({
         ownerId: ctx.session.user.id,
         value: String(sword.value),
         damage: String(sword.damage),
-        experience: Math.round(sword.experience),
+        experience: String(sword.experience),
         enchants: sword.enchants?.map((enchant) => enchant.name) ?? [],
       },
     });
@@ -128,7 +128,11 @@ export const swordRouter = createTRPCRouter({
             data: {
               money: String(BigInt(user.money) + BigInt(sword.value)),
               swordId: null,
-              experience: { increment: sword.experience },
+              experience: {
+                set: String(
+                  parseInt(user.experience) + parseInt(sword.experience),
+                ),
+              },
             },
           }),
           ctx.db.sword.delete({ where: { id: input } }),
@@ -348,7 +352,7 @@ export const swordRouter = createTRPCRouter({
             [ascending]: attemptedProperty.name,
             value: String(Math.round(newValue)),
             damage: String(Math.round(newDamage)),
-            experience: Math.round(newExperience),
+            experience: String(newExperience),
           },
         });
 

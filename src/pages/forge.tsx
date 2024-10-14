@@ -13,15 +13,6 @@ export default function Forge() {
   const [sword, setSword] = useState<SwordType | null>(null);
   const [user, setUser] = useState<UserType | null>(null);
 
-  const {
-    data: currentSword,
-    isLoading,
-    isRefetching,
-  } = api.sword.getCurrentSword.useQuery(undefined, {
-    refetchOnWindowFocus: false,
-    refetchOnMount: true,
-  });
-
   const { data: userData, isLoading: isUserLoading } = api.user.user.useQuery(
     undefined,
     {
@@ -31,11 +22,11 @@ export default function Forge() {
   );
 
   useEffect(() => {
-    setSword(currentSword ?? null);
+    setSword(userData?.swords.find((s) => s.id === userData.swordId) ?? null);
     setUser(userData ?? null);
-  }, [currentSword, userData]);
+  }, [userData]);
 
-  if (isLoading || isRefetching || isUserLoading) {
+  if (isUserLoading) {
     return <Layout isLoading />;
   }
 
