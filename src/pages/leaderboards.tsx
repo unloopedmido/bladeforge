@@ -47,7 +47,7 @@ export default function Leaderboards() {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {data?.map((user, index) => (
+          {data?.sort((a,b) => parseInt(b.experience) - parseInt(a.experience)).map((user, index) => (
             <TableRow key={user.id}>
               <TableCell>#{index + 1}</TableCell>
               <TableCell>

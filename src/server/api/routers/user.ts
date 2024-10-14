@@ -38,21 +38,37 @@ export const userRouter = createTRPCRouter({
       });
     }
   }),
-  
+
   getUsers: protectedProcedure.query(async ({ ctx }) => {
     try {
+      // Fetch more users than needed to ensure we have enough after sorting
       const users = await ctx.db.user.findMany({
-        take: 10,
-        orderBy: [{ experience: "desc" }, { luck: "desc" }, { money: "desc" }],
         include: {
           swords: true,
         },
         where: {
-          luck: { not: BigInt(1) || 1 },
+          luck: { not: BigInt(1) },
         },
+        orderBy: [{ luck: "desc" }, { money: "desc" }],
+        take: 20, // Fetch top 100 by luck and money
       });
 
-      return users;
+      // Custom sorting function
+      const sortedUsers = users.sort((a, b) => {
+        // Compare experience strings as big numbers
+        const expDiff = BigInt(b.experience) - BigInt(a.experience);
+        if (expDiff !== BigInt(0)) return expDiff > BigInt(0) ? 1 : -1;
+
+        // If experience is equal, compare luck
+        const luckDiff = b.luck - a.luck;
+        if (luckDiff !== BigInt(0)) return Number(luckDiff);
+
+        // If luck is also equal, compare money
+        return Number(b.money) - Number(a.money);
+      });
+
+      // Take the top 10 after sorting
+      return sortedUsers.slice(0, 10);
     } catch (error) {
       if (error instanceof TRPCError) throw error;
 

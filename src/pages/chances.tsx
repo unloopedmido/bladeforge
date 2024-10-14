@@ -80,8 +80,8 @@ export default function Chances() {
       <h1 className="text-center text-4xl font-bold">Chances</h1>
 
       {/* Tabs for Rarities, Qualities, Materials */}
-      <Tabs className="mb-5" defaultValue="rarity">
-        <TabsList>
+      <Tabs className="mb-5 mt-5" defaultValue="rarity">
+        <TabsList className="grid grid-cols-3 md:grid-cols-6 h-full">
           <TabsTrigger value="rarity">Rarities</TabsTrigger>
           <TabsTrigger value="quality">Qualities</TabsTrigger>
           <TabsTrigger value="material">Materials</TabsTrigger>

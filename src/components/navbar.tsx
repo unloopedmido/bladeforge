@@ -74,10 +74,12 @@ export default function Navbar() {
               <DropdownMenuItem asChild>
                 <Link href={`/profiles/${user?.id}`}>Profile</Link>
               </DropdownMenuItem>
-              <DropdownMenuItem asChild>
-                <Link href="/vip">VIP</Link>
-              </DropdownMenuItem>
             </>
+          )}
+          {isAuthenticated && !user?.vip && (
+            <DropdownMenuItem asChild>
+              <Link href="/vip">VIP</Link>
+            </DropdownMenuItem>
           )}
         </DropdownMenuContent>
       </DropdownMenu>
@@ -108,12 +110,14 @@ export default function Navbar() {
                   Profile
                 </NavigationMenuLink>
               </Link>
-              <Link href="/vip" legacyBehavior passHref>
-                <NavigationMenuLink className={navigationMenuTriggerStyle()}>
-                  VIP
-                </NavigationMenuLink>
-              </Link>
             </NavigationMenuItem>
+          )}
+          {isAuthenticated && !user?.vip && (
+            <Link href="/vip" legacyBehavior passHref>
+              <NavigationMenuLink className={navigationMenuTriggerStyle()}>
+                VIP
+              </NavigationMenuLink>
+            </Link>
           )}
         </NavigationMenuList>
       </NavigationMenu>

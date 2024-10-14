@@ -66,5 +66,5 @@ export default function Layout({
   }
 
   // If authenticated and user name exists, render children
-  return <div className="container mx-auto mb-10 flex flex-col flex-1">{children}</div>;
+  return <div className="container mx-auto mb-10 px-3 flex flex-col flex-1">{children}</div>;
 }

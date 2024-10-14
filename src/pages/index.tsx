@@ -33,7 +33,7 @@ export default function Home() {
   const { status } = useSession();
 
   return (
-      <div>
+      <div className="px-3">
         <header className="container mx-auto mb-32 mt-44 text-center xl:mb-60">
           <h1 className="mb-4 text-4xl font-bold leading-[1.2] sm:text-5xl md:text-6xl">
             <span className="bg-gradient-to-r from-orange-500 to-purple-500 bg-clip-text text-transparent">
@@ -68,7 +68,7 @@ export default function Home() {
             Learn More
           </Link>
         </header>
-        <section className="container mx-auto px-20 pb-5">
+        <section className="container mx-auto px-16 pb-5">
           <div className="relative">
             <Carousel opts={{ align: "start", loop: true }} className="w-full">
               <CarouselContent>
