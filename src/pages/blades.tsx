@@ -50,7 +50,7 @@ export default function Blades() {
     <Layout>
       <div className="container mx-auto mb-10">
         <h1 className="text-center text-4xl font-bold">Blades</h1>
-        <div className="mt-10 grid cursor-pointer grid-cols-1 justify-items-center gap-y-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+        <div className="mt-10 grid cursor-pointer grid-cols-1 justify-items-center gap-y-4 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3">
           {swords?.length ? (
             swords.map((sword) => (
               <div key={sword.id} className="flex flex-col items-center">
