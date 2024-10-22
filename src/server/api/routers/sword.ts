@@ -12,10 +12,9 @@ import {
   getRandomEnchant,
   totalLuck,
 } from "@/server/util";
-import Auras from "@/data/auras";
 import Enchants, { type Enchant } from "@/data/enchants";
 import type { db } from "@/server/db";
-import Effects from "@/data/effects";
+import { getSacrificeRerolls } from "@/data/common";
 
 const userCache = new Map<
   string,
@@ -148,16 +147,17 @@ export const swordRouter = createTRPCRouter({
           });
         }
 
+        console.log("Sword Value:", sword.value);
+        console.log("Sword Experience:", sword.experience);
+
         const [updatedUser] = await ctx.db.$transaction([
           ctx.db.user.update({
             where: { id: ctx.session.user.id },
             data: {
-              money: String(parseInt(user.money) + parseInt(sword.value)),
+              money: String(BigInt(user.money) + BigInt(sword.value)),
               swordId: null,
               experience: {
-                set: String(
-                  parseInt(user.experience) + parseInt(sword.experience),
-                ),
+                set: String(BigInt(user.experience) + BigInt(sword.experience)),
               },
             },
           }),
@@ -558,28 +558,13 @@ export const swordRouter = createTRPCRouter({
       });
     }
 
-    const material = Materials.find((m) => m.name === sword.material);
-    const quality = Qualities.find((q) => q.name === sword.quality);
-    const rarity = Rarities.find((r) => r.name === sword.rarity);
-    const aura = Auras.find((a) => a.name === sword.aura);
-    const effect = Effects.find((e) => e.name === sword.effect);
-
-    if (!material || !quality || !rarity) {
-      throw new TRPCError({
-        code: "NOT_FOUND",
-        message: "Failed to find sword properties",
-      });
-    }
-
-    const essence =
-      1 +
-      Math.floor(
-        (Materials.indexOf(material) * 0.5 +
-          Qualities.indexOf(quality) * 0.5 +
-          Rarities.indexOf(rarity) * 0.5) *
-          (aura ? Auras.indexOf(aura) + 1 : 1) *
-          (effect ? Effects.indexOf(effect) + 1 : 1),
-      );
+    const essence = getSacrificeRerolls(
+      sword.material,
+      sword.rarity,
+      sword.quality,
+      sword.aura ?? undefined,
+      sword.effect ?? undefined,
+    );
 
     const [updatedUser] = await ctx.db.$transaction([
       ctx.db.user.update({
