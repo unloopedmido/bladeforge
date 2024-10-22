@@ -138,18 +138,6 @@ export const userRouter = createTRPCRouter({
         message: "User not found",
       });
 
-    // Check if the user has a sword equipped
-    if (user.swordId) {
-      const sword = user.swords.find((s) => s.id === user.swordId);
-
-      return {
-        ...user,
-        user: {
-          sword,
-        },
-      };
-    }
-
     return user;
   }),
   upgradeLuck: protectedProcedure

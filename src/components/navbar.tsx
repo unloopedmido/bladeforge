@@ -47,6 +47,8 @@ export default function Navbar() {
 
   const isAuthenticated = status === "authenticated";
 
+  console.log(session?.user.image)
+
   return (
     <nav className="container mx-auto mb-10 flex items-center justify-between p-3">
       <DropdownMenu>

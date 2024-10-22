@@ -1,13 +1,21 @@
-import { createTRPCRouter, protectedProcedure } from "../trpc";
-import { z } from "zod";
 import Materials from "@/data/materials";
 import Qualities from "@/data/qualities";
 import Rarities from "@/data/rarities";
-import type { PrismaClient } from "@prisma/client";
+import { z } from "zod";
+import { env } from "@/env";
+import { createTRPCRouter, protectedProcedure } from "../trpc";
 import { TRPCError } from "@trpc/server";
 import { abbreviateNumber } from "@/lib/func";
-import { env } from "@/env";
-import { generateSword, getProperty, totalLuck } from "@/server/util";
+import {
+  generateSword,
+  getProperty,
+  getRandomEnchant,
+  totalLuck,
+} from "@/server/util";
+import Auras from "@/data/auras";
+import Enchants, { type Enchant } from "@/data/enchants";
+import type { db } from "@/server/db";
+import Effects from "@/data/effects";
 
 const userCache = new Map<
   string,
@@ -15,11 +23,12 @@ const userCache = new Map<
     lastAscend?: Date;
     lastGeneration?: Date;
     lastLuckUpgrade?: Date;
+    lastSell?: Date;
   }
 >();
 
 const userWithSword = async (ctx: {
-  db: PrismaClient;
+  db: typeof db;
   session: { user: { id: string } };
 }) => {
   const user = await ctx.db.user.findUnique({
@@ -58,6 +67,14 @@ export const swordRouter = createTRPCRouter({
   generateSword: protectedProcedure.mutation(async ({ ctx }) => {
     const { user } = await userWithSword(ctx);
 
+    if (user?.swordId) {
+      throw new TRPCError({
+        code: "BAD_REQUEST",
+        message:
+          "You must unequip your current sword before generating a new one",
+      });
+    }
+
     const now = Date.now();
     const cachedUser = userCache.get(user.id);
     const lastGeneration = cachedUser?.lastGeneration?.getTime() ?? 0;
@@ -70,13 +87,6 @@ export const swordRouter = createTRPCRouter({
         message: `Please wait ${((cooldown - (now - lastGeneration)) / 1000).toFixed(1)}s before generating a new sword`,
       });
     }
-
-    if (user?.swordId)
-      throw new TRPCError({
-        code: "BAD_REQUEST",
-        message:
-          "You must unequip your current sword before generating a new one",
-      });
 
     const sword = await generateSword(user);
 
@@ -101,7 +111,10 @@ export const swordRouter = createTRPCRouter({
 
     await ctx.db.user.update({
       where: { id: ctx.session.user.id },
-      data: { swordId: generatedSword.id },
+      data: {
+        swordId: generatedSword.id,
+        swordsGenerated: { increment: 1 },
+      },
     });
 
     userCache.set(user.id, { ...cachedUser, lastGeneration: new Date() });
@@ -122,6 +135,19 @@ export const swordRouter = createTRPCRouter({
             message: "Sword not found or you do not own this sword",
           });
 
+        const now = Date.now();
+        const cachedUser = userCache.get(user.id);
+        const lastSell = cachedUser?.lastSell?.getTime() ?? 0;
+
+        const cooldown = user?.vip ? 1000 : 2000;
+
+        if (lastSell && now - lastSell < cooldown) {
+          throw new TRPCError({
+            code: "TOO_MANY_REQUESTS",
+            message: `Please wait ${((cooldown - (now - lastSell)) / 1000).toFixed(1)}s before selling another sword`,
+          });
+        }
+
         const [updatedUser] = await ctx.db.$transaction([
           ctx.db.user.update({
             where: { id: ctx.session.user.id },
@@ -137,6 +163,8 @@ export const swordRouter = createTRPCRouter({
           }),
           ctx.db.sword.delete({ where: { id: input } }),
         ]);
+
+        userCache.set(user.id, { ...cachedUser, lastSell: new Date() });
 
         return {
           money: updatedUser.money,
@@ -379,4 +407,195 @@ export const swordRouter = createTRPCRouter({
         message: `Failed to ascend to ${attemptedProperty.name} (1/${abbreviateNumber(String(RNGLuck))}) as the current ${input} better or same`,
       });
     }),
+
+  rerollEnchants: protectedProcedure.mutation(async ({ ctx }) => {
+    const { user, sword } = await userWithSword(ctx);
+
+    if (!sword) {
+      throw new TRPCError({
+        code: "NOT_FOUND",
+        message: "No sword equipped",
+      });
+    }
+
+    if (user.essence < 1) {
+      throw new TRPCError({
+        code: "BAD_REQUEST",
+        message: "You do not have any essence",
+      });
+    }
+
+    // Fetching enchants associated with the sword
+    const enchants = sword.enchants
+      .map((e) => Enchants.find((i) => i.name === e))
+      .filter((e): e is Enchant => e !== undefined);
+
+    const enchantsCount = enchants.length;
+
+    if (enchantsCount === 0) {
+      throw new TRPCError({
+        code: "NOT_FOUND",
+        message: "Failed to find enchants",
+      });
+    }
+
+    // Function to calculate multipliers
+    const calculateMultiplier = (
+      enchants: Enchant[],
+      property: keyof Enchant,
+    ) => {
+      return (
+        enchants.reduce(
+          (acc, enchant) => acc + (Number(enchant[property]) || 0),
+          0,
+        ) || 1
+      ); // Prevent division by zero
+    };
+
+    // Calculate old multipliers
+    const oldMultipliers = {
+      value: calculateMultiplier(enchants, "valueMultiplier"),
+      damage: calculateMultiplier(enchants, "damageMultiplier"),
+      experience: calculateMultiplier(enchants, "experienceMultiplier"),
+      luck: calculateMultiplier(enchants, "luckMultiplier"),
+    };
+
+    const newEnchants: Enchant[] = [];
+    const existingEnchantNames = new Set(sword.enchants); // To track existing enchant names
+
+    while (newEnchants.length < enchantsCount) {
+      const newEnchant = getRandomEnchant();
+
+      // Check for duplicates
+      if (
+        !existingEnchantNames.has(newEnchant.name) &&
+        !newEnchants.some((e) => e.name === newEnchant.name)
+      ) {
+        newEnchants.push(newEnchant);
+      }
+    }
+
+    // Calculate new multipliers for the new enchants
+    const newMultipliers = {
+      value: calculateMultiplier(newEnchants, "valueMultiplier"),
+      damage: calculateMultiplier(newEnchants, "damageMultiplier"),
+      experience: calculateMultiplier(newEnchants, "experienceMultiplier"),
+      luck: calculateMultiplier(newEnchants, "luckMultiplier"),
+    };
+
+    // Function to calculate new stats
+    const calculateNewStat = (
+      oldValue: string,
+      oldMultiplier: number,
+      newMultiplier: number,
+    ) => Math.round((Number(oldValue) / oldMultiplier) * newMultiplier);
+
+    // Updated stats
+    const updatedStats = {
+      value: calculateNewStat(
+        sword.value,
+        oldMultipliers.value,
+        newMultipliers.value,
+      ),
+      damage: calculateNewStat(
+        sword.damage,
+        oldMultipliers.damage,
+        newMultipliers.damage,
+      ),
+      experience: calculateNewStat(
+        sword.experience,
+        oldMultipliers.experience,
+        newMultipliers.experience,
+      ),
+      luck: calculateNewStat(
+        String(sword.luck),
+        oldMultipliers.luck,
+        newMultipliers.luck,
+      ),
+    };
+
+    // Update the sword and user data
+    const [updatedSword] = await ctx.db.$transaction([
+      ctx.db.sword.update({
+        where: { id: sword.id },
+        data: {
+          enchants: newEnchants.map((enchant) => enchant.name),
+          value: String(updatedStats.value),
+          damage: String(updatedStats.damage),
+          experience: String(updatedStats.experience),
+          luck: updatedStats.luck,
+        },
+      }),
+      ctx.db.user.update({
+        where: { id: ctx.session.user.id },
+        data: { essence: { decrement: 1 } },
+      }),
+    ]);
+
+    return updatedSword;
+  }),
+
+  sacrificeSword: protectedProcedure.mutation(async ({ ctx }) => {
+    const { user, sword } = await userWithSword(ctx);
+
+    const now = new Date();
+    const cooldown = 1000 * 60 * 10; // 10 mins
+
+    if (
+      user.lastSacrificeAt &&
+      now.getTime() - new Date(user.lastSacrificeAt).getTime() <= cooldown
+    ) {
+      throw new TRPCError({
+        code: "BAD_REQUEST",
+        message: "You can only sacrifice 1 sword every 10 minutes",
+      });
+    }
+
+    if (!sword) {
+      throw new TRPCError({
+        code: "NOT_FOUND",
+        message: "No sword equipped",
+      });
+    }
+
+    const material = Materials.find((m) => m.name === sword.material);
+    const quality = Qualities.find((q) => q.name === sword.quality);
+    const rarity = Rarities.find((r) => r.name === sword.rarity);
+    const aura = Auras.find((a) => a.name === sword.aura);
+    const effect = Effects.find((e) => e.name === sword.effect);
+
+    if (!material || !quality || !rarity) {
+      throw new TRPCError({
+        code: "NOT_FOUND",
+        message: "Failed to find sword properties",
+      });
+    }
+
+    const essence =
+      1 +
+      Math.floor(
+        (Materials.indexOf(material) * 0.5 +
+          Qualities.indexOf(quality) * 0.5 +
+          Rarities.indexOf(rarity) * 0.5) *
+          (aura ? Auras.indexOf(aura) + 1 : 1) *
+          (effect ? Effects.indexOf(effect) + 1 : 1),
+      );
+
+    const [updatedUser] = await ctx.db.$transaction([
+      ctx.db.user.update({
+        where: { id: ctx.session.user.id },
+        data: {
+          essence: { increment: essence },
+          experience: {
+            set: String(parseInt(user.experience) + parseInt(sword.experience)),
+          },
+          swordId: null,
+          lastSacrificeAt: now,
+        },
+      }),
+      ctx.db.sword.delete({ where: { id: sword.id } }),
+    ]);
+
+    return updatedUser;
+  }),
 });

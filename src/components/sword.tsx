@@ -7,8 +7,7 @@ import { Fredoka } from "next/font/google";
 import { cn } from "@/lib/utils";
 import Materials from "@/data/materials";
 import { CoinsIcon, SwordIcon } from "lucide-react";
-import Enchants from "@/data/enchants";
-import { getSwordAura } from "@/data/common";
+import { getEnchantData, getSwordAura } from "@/data/common";
 import Effects from "@/data/effects";
 
 const CoolFont = Fredoka({
@@ -23,7 +22,7 @@ interface SwordProps {
 function Content({ sword, username }: SwordProps) {
   return (
     <div
-      className="relative flex h-[300px] w-[300px] flex-col p-3"
+      className="relative flex h-[350px] w-[350px] flex-col p-3"
       style={
         sword.effect
           ? {
@@ -36,7 +35,7 @@ function Content({ sword, username }: SwordProps) {
       <div
         className="absolute inset-0 h-full w-full"
         style={{
-          backgroundImage: `url('../${getSwordAura(sword.aura!)}')`,
+          backgroundImage: `url('${getSwordAura(sword.aura!)}')`,
           backgroundSize: "cover",
           backgroundPosition: "center",
           backgroundRepeat: "no-repeat",
@@ -116,7 +115,7 @@ function Content({ sword, username }: SwordProps) {
         {sword.quality}
       </h1>
 
-      <div className="flex h-full items-end justify-between px-1">
+      <div className="flex h-full items-end justify-between">
         <div className="flex flex-col text-start">
           {sword.enchants.map((enchant) => (
             <LinearGradient
@@ -124,11 +123,7 @@ function Content({ sword, username }: SwordProps) {
               className={cn("text-2xl font-extrabold", CoolFont.className)}
               gradient={[
                 "to right",
-                rgbToAlpha(
-                  // eslint-disable-next-line @typescript-eslint/no-non-null-asserted-optional-chain
-                  Enchants.find((e) => e.name === enchant)?.color!,
-                  1,
-                ).join(", "),
+                rgbToAlpha(getEnchantData(enchant).color, 1).join(", "),
               ]}
               style={{
                 textShadow: "2px 2px 4px rgba(0, 0, 0, 0.3)",
@@ -199,6 +194,7 @@ export default function Sword({ sword, username }: SwordProps) {
     <>
       {(Rarities.find((r) => r.name === sword.rarity)?.chance ?? 0) >= 336 ? (
         <ShineBorder
+        className="w-[350px] h-[350px]"
           borderWidth={5}
           duration={14}
           color={rgbToAlpha(

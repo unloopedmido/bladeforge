@@ -1,97 +1,98 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
-    provider = "prisma-client-js"
+  provider = "prisma-client-js"
 }
 
 datasource db {
-    provider = "postgres"
-    url      = env("DATABASE_URL")
+  provider  = "postgres"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
 }
 
 model Config {
-    id                   Int   @id @default(autoincrement())
-    luckMultiplier       Float @default(1.0)
-    experienceMultiplier Float @default(1.0)
-    valueMultiplier      Float @default(1.0)
+  id                   Int   @id @default(autoincrement())
+  luckMultiplier       Float @default(1.0)
+  experienceMultiplier Float @default(1.0)
+  valueMultiplier      Float @default(1.0)
 }
 
 model Account {
-    id                       String  @id @default(cuid())
-    userId                   String
-    type                     String
-    provider                 String
-    providerAccountId        String
-    refresh_token            String? // @db.Text
-    access_token             String? // @db.Text
-    expires_at               Int?
-    token_type               String?
-    scope                    String?
-    id_token                 String? // @db.Text
-    session_state            String?
-    user                     User    @relation(fields: [userId], references: [id], onDelete: Cascade)
-    refresh_token_expires_in Int?
+  id                       String  @id @default(cuid())
+  userId                   String
+  type                     String
+  provider                 String
+  providerAccountId        String
+  refresh_token            String?
+  access_token             String?
+  expires_at               Int?
+  token_type               String?
+  scope                    String?
+  id_token                 String?
+  session_state            String?
+  refresh_token_expires_in Int?
+  user                     User    @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-    @@unique([provider, providerAccountId])
-    @@index([userId])
+  @@unique([provider, providerAccountId])
+  @@index([userId])
 }
 
 model Session {
-    id           String   @id @default(cuid())
-    sessionToken String   @unique
-    userId       String
-    expires      DateTime
-    user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-    @@index([userId])
+  @@index([userId])
 }
 
 model Sword {
-    id            String   @id @default(cuid())
-    rarity        String
-    quality       String
-    material      String
-    aura          String?
-    effect        String?
-    enchants      String[] @default([])
-    value         String
-    damage        String
-    luck          Float    @default(1.0)
-    experience    String   @default("100")
-    createdAt     DateTime @default(now())
-    updatedAt     DateTime @updatedAt
-    ownerId       String
-    owner         User     @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  id         String   @id @default(cuid())
+  rarity     String
+  quality    String
+  material   String
+  aura       String?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  ownerId    String
+  enchants   String[] @default([])
+  luck       Float    @default(1.0)
+  effect     String?
+  damage     String
+  value      String
+  experience String   @default("100")
+  owner      User     @relation(fields: [ownerId], references: [id], onDelete: Cascade)
 
-    @@index([ownerId])
+  @@index([ownerId])
 }
 
 model User {
-    id            String    @id @default(cuid())
-    name          String?
-    image         String?
-    experience    String    @default("100")
-    luck          BigInt    @default(1)
-    money         String    @default("50")
-    email         String?   @unique
-    emailVerified DateTime?
-    vip           Boolean   @default(false)
-    booster       Boolean   @default(false)
-    swordId       String?
-    createdAt     DateTime  @default(now())
-    accounts      Account[]
-    sessions      Session[]
-    swords        Sword[]
+  id              String      @id @default(cuid())
+  name            String?
+  image           String?
+  luck            BigInt      @default(1)
+  vip             Boolean     @default(false)
+  swordId         String?
+  createdAt       DateTime    @default(now())
+  booster         Boolean     @default(false)
+  email           String?     @unique
+  emailVerified   DateTime?
+  money           String      @default("50")
+  experience      String      @default("100")
+  swordsGenerated Int         @default(0) @map("swords_generated")
+  essence         Int         @default(0) @map("essence")
+  lastSacrificeAt DateTime?
+  accounts        Account[]
+  sessions        Session[]
+  swords          Sword[]
 
-    @@index([swordId, email])
+  @@index([swordId, email])
 }
 
 model VerificationToken {
-    identifier String
-    token      String   @unique
-    expires    DateTime
+  identifier String
+  token      String   @unique
+  expires    DateTime
 
-    @@unique([identifier, token])
-    @@index([identifier])
+  @@unique([identifier, token])
+  @@index([identifier])
 }

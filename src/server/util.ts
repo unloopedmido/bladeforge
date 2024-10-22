@@ -103,9 +103,9 @@ export async function generateSword(user: User) {
 
     if (userLevel < 10) {
       return [];
-    } else if (userLevel >= 110) {
-      addUniqueEnchants(4);
     } else if (userLevel >= 75) {
+      addUniqueEnchants(4);
+    } else if (userLevel >= 50) {
       addUniqueEnchants(3);
     } else if (userLevel >= 25) {
       addUniqueEnchants(2);
@@ -148,10 +148,13 @@ export async function generateSword(user: User) {
       (enchantDamage || 1),
   );
 
-  const experience =
-    Math.floor(value * 0.1) *
-    config.experienceMultiplier *
-    (enchantExperience || 1); // 10% of value
+  const experience = Math.floor(
+    value *
+      0.14 *
+      (enchantExperience || 1) *
+      config.experienceMultiplier *
+      (1 + userLevel * 0.02),
+  );
 
   return {
     material: material?.name,

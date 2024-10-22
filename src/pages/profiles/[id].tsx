@@ -5,19 +5,31 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Sword, Coins, Zap, Shield, Clover } from "lucide-react";
 import { getForgingTitle } from "@/data/common";
-import { abbreviateNumber, getLevelFromExperience, getExperienceForNextLevel } from "@/lib/func";
+import {
+  abbreviateNumber,
+  getLevelFromExperience,
+  getExperienceForNextLevel,
+} from "@/lib/func";
 import SwordDisplay from "@/components/sword";
 import { Progress } from "@/components/ui/progress";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import Link from "next/link";
 import { useRouter } from "next/router";
 
 export default function Profile() {
   const { query } = useRouter();
-  const { data: user, isLoading } = api.user.getUser.useQuery(query.id as string ?? "", {
-    refetchOnWindowFocus: false,
-    refetchOnMount: true,
-  });
+  const { data: user, isLoading } = api.user.getUser.useQuery(
+    (query.id as string) ?? "",
+    {
+      refetchOnWindowFocus: false,
+      refetchOnMount: true,
+    },
+  );
 
   const { data: allUsers } = api.user.getAllUsers.useQuery(undefined, {
     refetchOnWindowFocus: false,
@@ -33,35 +45,41 @@ export default function Profile() {
   const currentExperience = Number(user?.experience ?? 0);
   const currentLevel = getLevelFromExperience(currentExperience);
   const experienceRequired = getExperienceForNextLevel(currentLevel);
-  const experiencePercentage = ((currentExperience % experienceRequired) / experienceRequired) * 100;
+  const experiencePercentage =
+    ((currentExperience % experienceRequired) / experienceRequired) * 100;
 
   const filteredUsers = allUsers?.filter((otherUser) =>
-    otherUser.name?.toLowerCase().includes(searchTerm.toLowerCase())
+    otherUser.name?.toLowerCase().includes(searchTerm.toLowerCase()),
   );
 
   return (
     <Layout>
-      <h1 className="text-center text-4xl font-bold mb-8">Bladesmith Profile</h1>
-      <div className="w-full grid gap-8 grid-cols-1 md:grid-cols-2 max-w-3xl mx-auto">
+      <h1 className="mb-8 text-center text-4xl font-bold">
+        Bladesmith Profile
+      </h1>
+      <div className="mx-auto grid w-full max-w-3xl grid-cols-1 gap-8 md:grid-cols-2">
         <Card className="col-span-2">
           <CardHeader className="flex flex-row items-center space-x-4">
             <Avatar className="h-20 w-20">
-              <AvatarImage
-                src={user?.image ?? ""}
-                alt={user?.name ?? "User"}
-              />
+              <AvatarImage src={user?.image ?? ""} alt={user?.name ?? "User"} />
               <AvatarFallback>{user?.name?.[0] ?? "U"}</AvatarFallback>
             </Avatar>
             <div>
               <CardTitle className="text-2xl">{user?.name}</CardTitle>
-              <p className="text-muted-foreground text-md">{user?.id}</p>
-              <p className="text-md font-semibold text-primary">{getForgingTitle(currentLevel)}</p>
+              <p className="text-md text-muted-foreground">{user?.id}</p>
+              <p className="text-md font-semibold text-primary">
+                {getForgingTitle(currentLevel)}
+              </p>
               <div className="mt-2">
                 {user?.vip && (
-                  <span className="mr-2 rounded bg-yellow-500 px-2 py-1 text-xs font-bold text-white">VIP</span>
+                  <span className="mr-2 rounded bg-yellow-500 px-2 py-1 text-xs font-bold text-white">
+                    VIP
+                  </span>
                 )}
                 {user?.booster && (
-                  <span className="rounded bg-purple-500 px-2 py-1 text-xs font-bold text-white">Booster</span>
+                  <span className="rounded bg-purple-500 px-2 py-1 text-xs font-bold text-white">
+                    Booster
+                  </span>
                 )}
               </div>
             </div>
@@ -73,17 +91,20 @@ export default function Profile() {
           <CardContent>
             <div className="flex items-center justify-between">
               <div>
-                <h2 className="mt-4 text-2xl font-bold">Level {currentLevel}</h2>
+                <h2 className="mt-4 text-2xl font-bold">
+                  Level {currentLevel}
+                </h2>
                 <TooltipProvider>
                   <Tooltip>
                     <TooltipTrigger asChild>
-                      <p className="text-sm text-muted-foreground cursor-pointer">
+                      <p className="cursor-pointer text-sm text-muted-foreground">
                         {abbreviateNumber(String(currentExperience))} Total XP
                       </p>
                     </TooltipTrigger>
                     <TooltipContent>
                       <p>
-                        Experience: {currentExperience.toLocaleString()} / {experienceRequired.toLocaleString()}
+                        Experience: {currentExperience.toLocaleString()} /{" "}
+                        {experienceRequired.toLocaleString()}
                       </p>
                     </TooltipContent>
                   </Tooltip>
@@ -102,11 +123,13 @@ export default function Profile() {
           <CardHeader>
             <CardTitle className="flex items-center">
               <Sword className="mr-2" />
-              Swords Forged
+              Swords Generated
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-xl text-center">{user?.swords?.length ?? 0}</p>
+            <p className="text-center text-xl">
+              {user?.swordsGenerated.toLocaleString("en-US")}
+            </p>
           </CardContent>
         </Card>
 
@@ -118,7 +141,9 @@ export default function Profile() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-xl text-center">{abbreviateNumber(user?.money ?? "0")}</p>
+            <p className="text-center text-xl">
+              {abbreviateNumber(user?.money ?? "0")}
+            </p>
           </CardContent>
         </Card>
 
@@ -130,7 +155,9 @@ export default function Profile() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-xl text-center">{abbreviateNumber(user?.experience?.toString() ?? "0")}</p>
+            <p className="text-center text-xl">
+              {abbreviateNumber(user?.experience?.toString() ?? "0")}
+            </p>
           </CardContent>
         </Card>
 
@@ -142,11 +169,13 @@ export default function Profile() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-xl text-center">{abbreviateNumber(user?.luck?.toString() ?? "1")}</p>
+            <p className="text-center text-xl">
+              {abbreviateNumber(user?.luck?.toString() ?? "1")}
+            </p>
           </CardContent>
         </Card>
 
-        <Card className="col-span-2 flex items-center flex-col">
+        <Card className="col-span-2 flex flex-col items-center">
           <CardHeader>
             <CardTitle className="flex items-center">
               <Shield className="mr-2" />
@@ -180,16 +209,17 @@ export default function Profile() {
               placeholder="Search users..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full p-2 border rounded"
+              className="w-full rounded border p-2"
             />
             <div className="mt-4">
-              {filteredUsers?.length === 1 && filteredUsers?.map((otherUser) => (
-                <Link key={otherUser.id} href={`/profiles/${otherUser.id}`}>
-                  <div className="p-2 border-b hover:bg-foreground/20 cursor-pointer">
-                    {otherUser.name}
-                  </div>
-                </Link>
-              ))}
+              {filteredUsers?.length === 1 &&
+                filteredUsers?.map((otherUser) => (
+                  <Link key={otherUser.id} href={`/profiles/${otherUser.id}`}>
+                    <div className="cursor-pointer border-b p-2 hover:bg-foreground/20">
+                      {otherUser.name}
+                    </div>
+                  </Link>
+                ))}
             </div>
           </CardContent>
         </Card>

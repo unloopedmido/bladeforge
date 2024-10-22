@@ -45,6 +45,7 @@ export const authOptions: NextAuthOptions = {
         ...session,
         user: {
           ...session.user,
+          image: user.image,
           id: user.id,
         },
       };
