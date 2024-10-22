@@ -152,7 +152,7 @@ export const swordRouter = createTRPCRouter({
           ctx.db.user.update({
             where: { id: ctx.session.user.id },
             data: {
-              money: String(BigInt(user.money) + BigInt(sword.value)),
+              money: String(parseInt(user.money) + parseInt(sword.value)),
               swordId: null,
               experience: {
                 set: String(
