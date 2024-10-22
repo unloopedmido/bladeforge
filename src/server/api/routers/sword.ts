@@ -147,18 +147,70 @@ export const swordRouter = createTRPCRouter({
           });
         }
 
-        console.log("Sword Value:", sword.value);
-        console.log("Sword Experience:", sword.experience);
+        // Validate and parse the string values to BigInt
+        if (
+          !sword.value ||
+          !sword.experience ||
+          !user.money ||
+          !user.experience
+        ) {
+          throw new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: "Invalid sword or user data",
+          });
+        }
 
+        // Parse strings to BigInt, with additional error handling
+        let swordValue: bigint,
+          swordExperience: bigint,
+          userMoney: bigint,
+          userExperience: bigint;
+
+        try {
+          swordValue = BigInt(sword.value);
+          swordExperience = BigInt(sword.experience);
+          userMoney = BigInt(user.money);
+          userExperience = BigInt(user.experience);
+        } catch (e) {
+          console.error("BigInt conversion error:", e);
+          throw new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: "Error processing large numbers",
+          });
+        }
+
+        // Calculate new totals first to validate them
+        const newMoney = userMoney + swordValue;
+        const newExperience = userExperience + swordExperience;
+
+        // Log the values for debugging
+        console.log({
+          originalValues: {
+            swordValue: sword.value,
+            swordExp: sword.experience,
+            userMoney: user.money,
+            userExp: user.experience,
+          },
+          convertedBigInts: {
+            swordValue: swordValue.toString(),
+            swordExp: swordExperience.toString(),
+            userMoney: userMoney.toString(),
+            userExp: userExperience.toString(),
+          },
+          newTotals: {
+            money: newMoney.toString(),
+            exp: newExperience.toString(),
+          },
+        });
+
+        // Perform the transaction with the validated values
         const [updatedUser] = await ctx.db.$transaction([
           ctx.db.user.update({
             where: { id: ctx.session.user.id },
             data: {
-              money: String(BigInt(user.money) + BigInt(sword.value)),
+              money: newMoney.toString(),
               swordId: null,
-              experience: {
-                set: String(BigInt(user.experience) + BigInt(sword.experience)),
-              },
+              experience: newExperience.toString(),
             },
           }),
           ctx.db.sword.delete({ where: { id: input } }),
@@ -171,6 +223,7 @@ export const swordRouter = createTRPCRouter({
           experience: updatedUser.experience,
         };
       } catch (error) {
+        console.error("Sell sword error:", error);
         if (error instanceof TRPCError) throw error;
 
         throw new TRPCError({
