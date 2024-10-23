@@ -1,8 +1,39 @@
 import React from "react";
 import Layout from "@/components/layout";
-import { buttonVariants } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Sparkles,
+  Zap,
+  Box,
+  Crown,
+  Rocket,
+  Star,
+  Clock,
+  Lock,
+} from "lucide-react";
 import { api } from "@/utils/api";
+import { Badge } from "@/components/ui/badge";
+
+const VIPFeature = ({
+  icon: Icon,
+  title,
+  description,
+}: {
+  icon: React.ComponentType<{ className?: string }>;
+  title: string;
+  description?: string;
+}) => (
+  <div className="flex items-start gap-3 rounded-lg border border-border/50 bg-muted/50 p-3 items-center">
+    <Icon className="h-5 w-5 text-purple-500" />
+    <div>
+      <p className="font-semibold">{title}</p>
+      {description && (
+        <p className="text-sm text-muted-foreground">{description}</p>
+      )}
+    </div>
+  </div>
+);
 
 export default function Membership() {
   const { data, isLoading } = api.user.user.useQuery(undefined, {
@@ -14,64 +45,117 @@ export default function Membership() {
 
   return (
     <Layout>
-      {data && !data.vip && (
-        <div className="h-full flex-grow">
-          <h1 className="text-center text-4xl font-bold">VIP Membership</h1>
-          <div className="p-4">
-            <h2 className="text-2xl font-semibold">Become a VIP Member</h2>
-            <p className="mb-4 text-lg">
-              Join our community of Bladesmiths and unlock exclusive features,
-              rewards, and benefits by becoming a VIP member!
-            </p>
-            <p className="text-md mb-2">As a VIP member, you&apos;ll enjoy:</p>
-            <ul className="mb-4 list-inside list-disc">
-              <li>30% luck boost</li>
-              <li>2x faster generation</li>
-              <li>2x faster ascension</li>
-              <li>30 inventory space instead of 10</li>
-              <li>Exclusive access to special content</li>
-              <li>Early access to new game features</li>
-              <li>Unique in-game items and boosts (Coming Soon)</li>
-            </ul>
-            <p className="text-md mb-4">
-              This membership will be managed securely by Patreon for just
-              $4/month or €3.75/month. It will be our only way of making profit
-              to keep running Cored for free for everyone!
-            </p>
-            <a
-              href="https://www.patreon.com/coredinc/membership"
-              target="_blank"
-              rel="noopener noreferrer"
-              className={cn(
-                buttonVariants({ variant: "default" }),
-                "w-full font-bold",
-              )}
-            >
-              Become a VIP Member on Patreon
-            </a>
+      <div className="container mx-auto max-w-4xl px-4 py-8">
+        {data && !data.vip ? (
+          <div className="space-y-8">
+            {/* Header Section */}
+            <div className="text-center">
+              <Badge variant="secondary" className="mb-4">
+                <Sparkles className="mr-1 h-3 w-3" />
+                Exclusive Benefits
+              </Badge>
+              <h1 className="mb-3 text-4xl font-bold">Unlock VIP Membership</h1>
+              <p className="text-lg text-muted-foreground">
+                Join our community of Bladesmiths and experience
+                BladeForge like never before
+              </p>
+            </div>
+
+            {/* Main Card */}
+            <Card className="border-purple-500/20 bg-card/50 backdrop-blur">
+              <CardHeader>
+                <CardTitle className="flex items-center justify-between">
+                  <span className="text-2xl">VIP Benefits</span>
+                  <Badge variant="default" className="bg-purple-500">
+                    Only $4/mo
+                  </Badge>
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                {/* Features Grid */}
+                <div className="grid gap-4 md:grid-cols-2">
+                  <VIPFeature
+                    icon={Zap}
+                    title="30% Luck Boost"
+                    description="Increase your chances of rare finds"
+                  />
+                  <VIPFeature
+                    icon={Clock}
+                    title="2x Faster Generation"
+                    description="Create swords twice as fast"
+                  />
+                  <VIPFeature
+                    icon={Rocket}
+                    title="2x Faster Ascension"
+                    description="Progress through ranks quicker"
+                  />
+                  <VIPFeature
+                    icon={Box}
+                    title="30 Inventory Slots"
+                    description="Triple the standard inventory space"
+                  />
+                  <VIPFeature
+                    icon={Crown}
+                    title="Early Access"
+                    description="Be the first to try new features"
+                  />
+                  <VIPFeature
+                    icon={Star}
+                    title="Exclusive Content"
+                    description="Access special items and events"
+                  />
+                </div>
+
+                {/* Call to Action */}
+                <div className="mt-8 space-y-4 text-center">
+                  <p className="text-sm text-muted-foreground mb-3">
+                    Membership is managed securely through Patreon. Your support
+                    helps keep BladeForge free for everyone!
+                  </p>
+                  <a
+                    href="https://www.patreon.com/coredinc/membership"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    <Button
+                      size="lg"
+                      className="w-full gap-2 bg-purple-500 font-semibold hover:bg-purple-600"
+                    >
+                      <Lock className="h-4 w-4" />
+                      Become a VIP Member
+                    </Button>
+                  </a>
+                </div>
+              </CardContent>
+            </Card>
           </div>
-        </div>
-      )}
-
-      <div className="text-center max-w-3xl mx-auto">
-        <h1 className="text-center text-4xl font-bold">
-          Thank you for being a VIP member!
-        </h1>
-
-        <p className="m-4 text-lg">
-          We appreciate your support! As a VIP member, you already enjoy all the
-          exclusive perks:
-        </p>
-        <ul className="mb-4 list-inside list-disc text-left">
-          <li>30% luck boost</li>
-          <li>2x faster generation</li>
-          <li>2x faster ascension</li>
-          <li>30 inventory space instead of 10</li>
-          <li>Exclusive access to special content</li>
-          <li>Early access to new game features</li>
-          <li>Unique in-game items and boosts</li>
-          <li>Participation in VIP-only events</li>
-        </ul>
+        ) : (
+          // VIP Member View
+          <Card className="border-purple-500/20 bg-card/50 backdrop-blur">
+            <CardHeader className="text-center">
+              <Badge variant="secondary" className="mx-auto mb-4 w-fit">
+                <Crown className="mr-1 h-3 w-3" />
+                VIP Member
+              </Badge>
+              <CardTitle className="text-3xl">
+                Thank You for Your Support!
+              </CardTitle>
+              <p className="text-muted-foreground">
+                You&apos;re enjoying all the exclusive VIP benefits
+              </p>
+            </CardHeader>
+            <CardContent>
+              <div className="grid gap-4 md:grid-cols-2">
+                <VIPFeature icon={Zap} title="30% Luck Boost" />
+                <VIPFeature icon={Clock} title="2x Faster Generation" />
+                <VIPFeature icon={Rocket} title="2x Faster Ascension" />
+                <VIPFeature icon={Box} title="30 Inventory Slots" />
+                <VIPFeature icon={Crown} title="Early Access" />
+                <VIPFeature icon={Star} title="Exclusive Content" />
+              </div>
+            </CardContent>
+          </Card>
+        )}
       </div>
     </Layout>
   );

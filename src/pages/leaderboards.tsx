@@ -1,21 +1,17 @@
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import {
-  HoverCard,
-  HoverCardContent,
-  HoverCardTrigger,
-} from "@/components/ui/hover-card";
+import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { abbreviateNumber, getLevelFromExperience } from "@/lib/func";
 import { api } from "@/utils/api";
-import { CalendarIcon, SwordIcon, CoinsIcon, CloverIcon } from "lucide-react";
+import { CalendarIcon, SwordIcon, CoinsIcon, CloverIcon, Trophy, Medal, Crown } from "lucide-react";
 import Layout from "@/components/layout";
+import { cn } from "@/lib/utils";
+
+const RankIcon = ({ position }: { position: number }) => {
+  if (position === 1) return <Crown className="h-6 w-6 text-yellow-500" />;
+  if (position === 2) return <Medal className="h-6 w-6 text-slate-300" />;
+  if (position === 3) return <Medal className="h-6 w-6 text-orange-400" />;
+  return <Trophy className="h-5 w-5 text-muted-foreground" />;
+};
 
 export default function Leaderboards() {
   const { data, isLoading } = api.user.getUsers.useQuery(undefined, {
@@ -30,51 +26,75 @@ export default function Leaderboards() {
     }).format(date);
   }
 
-  if (isLoading) {
-    return <Layout isLoading />;
-  }
+  if (isLoading) return <Layout isLoading />;
+
+  const sortedUsers = data?.sort((a, b) => parseInt(b.experience) - parseInt(a.experience));
 
   return (
     <Layout>
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead>Position</TableHead>
-            <TableHead>Username</TableHead>
-            <TableHead>Level</TableHead>
-            <TableHead>Money</TableHead>
-            <TableHead>Luck</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {data?.sort((a,b) => parseInt(b.experience) - parseInt(a.experience)).map((user, index) => (
-            <TableRow key={user.id}>
-              <TableCell>#{index + 1}</TableCell>
-              <TableCell>
+      <div className="container mx-auto max-w-4xl px-4 py-6">
+        <div className="mb-8 text-center">
+          <h1 className="text-4xl font-bold">Leaderboards</h1>
+          <p className="text-muted-foreground">Top Bladesmiths ranking by level</p>
+        </div>
+
+        <div className="space-y-4">
+          {sortedUsers?.map((user, index) => (
+            <div
+              key={user.id}
+              className={cn(
+                "group relative overflow-hidden rounded-lg border bg-card/50 p-4 transition-all hover:bg-card",
+                index < 3 ? "border-purple-500/20" : "border-border/50"
+              )}
+            >
+              {/* Animated background for top 3 */}
+              {index < 3 && (
+                <div className="absolute inset-0 -z-10 bg-gradient-to-r from-purple-500/10 to-transparent opacity-0 transition-opacity group-hover:opacity-100" />
+              )}
+
+              <div className="flex items-center gap-4">
+                {/* Rank section */}
+                <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-muted">
+                  <RankIcon position={index + 1} />
+                </div>
+
+                {/* User info section */}
                 <HoverCard>
-                  <HoverCardTrigger className="cursor-pointer font-medium underline">
-                    {user.name}
+                  <HoverCardTrigger>
+                    <div className="flex items-center gap-3">
+                      <Avatar className="h-12 w-12 border-2 border-purple-500/20">
+                        <AvatarImage src={user.image ?? undefined} />
+                        <AvatarFallback>{user.name?.slice(0, 2).toUpperCase()}</AvatarFallback>
+                      </Avatar>
+                      <div className="text-left">
+                        <div className="flex items-center gap-2">
+                          <span className="font-bold">{user.name}</span>
+                          {user.vip && (
+                            <span className="rounded bg-gradient-to-r from-yellow-400 to-yellow-600 px-1.5 py-0.5 text-xs font-bold text-black">
+                              VIP
+                            </span>
+                          )}
+                        </div>
+                        <div className="text-sm text-muted-foreground">
+                          Level {getLevelFromExperience(Number(user.experience))}
+                        </div>
+                      </div>
+                    </div>
                   </HoverCardTrigger>
                   <HoverCardContent
                     className="w-80"
                     style={user.vip ? { border: "1px solid #ca8a04" } : {}}
                   >
                     <div className="flex justify-between space-x-4">
-                      <div className="flex items-center justify-center">
-                        <Avatar className="h-28 w-28">
-                          <AvatarImage src={user.image ?? undefined} />
-                          <AvatarFallback>
-                            {user.name?.slice(0, 2).toUpperCase()}
-                          </AvatarFallback>
-                        </Avatar>
-                      </div>
-                      <div className="space-y-1">
-                        <h4
-                          className={
-                            "flex items-center gap-x-2 text-sm font-semibold" +
-                            (user.vip ? " text-yellow-500" : "")
-                          }
-                        >
+                      <Avatar className="h-28 w-28">
+                        <AvatarImage src={user.image ?? undefined} />
+                        <AvatarFallback>{user.name?.slice(0, 2).toUpperCase()}</AvatarFallback>
+                      </Avatar>
+                      <div className="space-y-2">
+                        <h4 className={cn(
+                          "flex items-center gap-x-2 font-semibold",
+                          user.vip && "text-yellow-500"
+                        )}>
                           {user.vip && (
                             <span className="rounded bg-gradient-to-r from-yellow-400 to-yellow-600 px-1 text-xs font-bold text-black">
                               VIP
@@ -82,27 +102,21 @@ export default function Leaderboards() {
                           )}
                           {user.name}
                         </h4>
-                        <div className="flex items-center gap-1 text-sm">
-                          Level{" "}
-                          {getLevelFromExperience(Number(user.experience))}
-                        </div>
-                        <div className="space-y-2 pt-2">
+                        <div className="space-y-2.5">
                           <div className="flex items-center text-sm">
-                            <CoinsIcon className="mr-2 h-4 w-4 opacity-70" />
-                            <span>{abbreviateNumber(user.money)} coins</span>
+                            <CoinsIcon className="mr-2 h-4 w-4 text-yellow-500" />
+                            {abbreviateNumber(user.money)} coins
                           </div>
                           <div className="flex items-center text-sm">
-                            <SwordIcon className="mr-2 h-4 w-4 opacity-70" />
-                            <span>
-                              {user.swords.length || 0} sword(s) stored
-                            </span>
+                            <SwordIcon className="mr-2 h-4 w-4 text-red-500" />
+                            {user.swordsGenerated || 0} swords
                           </div>
                           <div className="flex items-center text-sm">
-                            <CloverIcon className="mr-2 h-4 w-4 opacity-70" />
-                            <span>{Number(user.luck)} luck</span>
+                            <CloverIcon className="mr-2 h-4 w-4 text-green-500" />
+                            {Number(user.luck)} luck
                           </div>
                           <div className="flex items-center text-xs text-muted-foreground">
-                            <CalendarIcon className="mr-2 h-4 w-4 opacity-70" />
+                            <CalendarIcon className="mr-2 h-4 w-4" />
                             Joined {formatDate(user.createdAt)}
                           </div>
                         </div>
@@ -110,16 +124,23 @@ export default function Leaderboards() {
                     </div>
                   </HoverCardContent>
                 </HoverCard>
-              </TableCell>
-              <TableCell>
-                {getLevelFromExperience(Number(user.experience))}
-              </TableCell>
-              <TableCell>{abbreviateNumber(user.money)}</TableCell>
-              <TableCell>{Number(user.luck)}</TableCell>
-            </TableRow>
+
+                {/* Stats section */}
+                <div className="ml-auto flex items-center gap-6">
+                  <div className="flex items-center gap-2">
+                    <CoinsIcon className="h-4 w-4 text-yellow-500" />
+                    <span className="text-sm font-medium">{abbreviateNumber(user.money)}</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <CloverIcon className="h-4 w-4 text-green-500" />
+                    <span className="text-sm font-medium">{Number(user.luck)}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
           ))}
-        </TableBody>
-      </Table>
+        </div>
+      </div>
     </Layout>
   );
 }

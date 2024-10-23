@@ -179,6 +179,9 @@ export default function Navbar() {
               <DropdownMenuItem asChild>
                 <Link href={`/profiles/${user?.id}`}>Profile</Link>
               </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <Link href={`/vip`}>Membership</Link>
+              </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem asChild>
                 <Link className="text-red-500" href="/api/auth/signout">

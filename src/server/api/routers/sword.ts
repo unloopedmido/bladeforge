@@ -148,12 +148,7 @@ export const swordRouter = createTRPCRouter({
         }
 
         // Validate and parse the string values to BigInt
-        if (
-          !sword.value ||
-          !sword.experience ||
-          !user.money ||
-          !user.experience
-        ) {
+        if (!sword.value || !sword.experience || !user.money || !user.experience) {
           throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
             message: "Invalid sword or user data",
@@ -161,11 +156,8 @@ export const swordRouter = createTRPCRouter({
         }
 
         // Parse strings to BigInt, with additional error handling
-        let swordValue: bigint,
-          swordExperience: bigint,
-          userMoney: bigint,
-          userExperience: bigint;
-
+        let swordValue: bigint, swordExperience: bigint, userMoney: bigint, userExperience: bigint;
+        
         try {
           swordValue = BigInt(sword.value);
           swordExperience = BigInt(sword.experience);
@@ -189,18 +181,18 @@ export const swordRouter = createTRPCRouter({
             swordValue: sword.value,
             swordExp: sword.experience,
             userMoney: user.money,
-            userExp: user.experience,
+            userExp: user.experience
           },
           convertedBigInts: {
             swordValue: swordValue.toString(),
             swordExp: swordExperience.toString(),
             userMoney: userMoney.toString(),
-            userExp: userExperience.toString(),
+            userExp: userExperience.toString()
           },
           newTotals: {
             money: newMoney.toString(),
-            exp: newExperience.toString(),
-          },
+            exp: newExperience.toString()
+          }
         });
 
         // Perform the transaction with the validated values

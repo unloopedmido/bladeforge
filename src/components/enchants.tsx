@@ -105,7 +105,7 @@ const RerollModal = ({
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button variant="secondary" disabled={!sword || essenceLeft === 0}>
+        <Button variant="secondary" disabled={!sword || essenceLeft === 0 || sword.enchants.length === 0}>
           <Redo className="mr-2 h-4 w-4" />
           Reroll Enchants ({essenceLeft})
         </Button>

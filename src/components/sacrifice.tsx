@@ -120,6 +120,7 @@ const SacrificeModal = ({
         )}
 
         <DialogFooter>
+          <DialogTrigger asChild>
           <Button
             variant="destructive"
             className="w-full"
@@ -138,6 +139,7 @@ const SacrificeModal = ({
               </>
             )}
           </Button>
+          </DialogTrigger>
         </DialogFooter>
       </DialogContent>
     </Dialog>
