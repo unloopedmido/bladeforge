@@ -18,7 +18,6 @@ const Materials: Material[] = [
   { name: "Zinc", color: ["rgb(157,157,157)", "rgb(110,110,110)"] },
   { name: "Lead", color: ["rgb(105,105,105)", "rgb(70,70,70)"] },
   { name: "Titanium", color: ["rgb(196,196,196)", "rgb(160,160,160)"] },
-  { name: "Graphene", color: ["rgb(0,0,0)", "rgb(50,50,50)"] }, // New Material
   { name: "Gold", color: ["rgb(255,215,0)", "rgb(184,134,11)"] },
   { name: "Platinum", color: ["rgb(229,228,226)", "rgb(192,192,192)"] },
   {
@@ -31,11 +30,11 @@ const Materials: Material[] = [
   },
   { name: "Ruby", color: ["rgb(255,0,0)", "rgb(139,0,0)"] },
   { name: "Sapphire", color: ["rgb(15,82,186)", "rgb(0,0,139)"] },
-  { name: "Silver", color: ["rgb(192,192,192)", "rgb(255,255,255)"] }, // New Material
   {
     name: "Carbon Fiber",
     color: ["rgb(70,70,70)", "rgb(100,100,100)", "rgb(130,130,130)"],
   },
+  { name: "Glass", color: ["rgb(100,200,250)", "rgb(50,100,150)"] },
   { name: "Obsidian", color: ["rgb(20,20,20)", "rgb(40,40,40)"] },
   { name: "Quartz", color: ["rgb(250,250,250)", "rgb(220,220,220)"] },
   { name: "Ivory", color: ["rgb(255,255,240)", "rgb(255,250,205)"] },
@@ -45,6 +44,8 @@ const Materials: Material[] = [
   { name: "Bismuth", color: ["rgb(153,50,204)", "rgb(255,105,180)"] }, // New Material
   { name: "Cobalt", color: ["rgb(0,71,171)", "rgb(66,66,66)"] }, // New Material
   { name: "Tungsten", color: ["rgb(169,169,169)", "rgb(119,136,153)"] }, // New Material
+  { name: "Graphene", color: ["rgb(0,0,0)", "rgb(50,50,50)"] }, // New Material
+  { name: "Silver", color: ["rgb(192,192,192)", "rgb(255,255,255)"] }, // New Material
   { name: "Mythril", color: ["rgb(160,160,255)", "rgb(255,255,255)"] }, // New Material
   { name: "Aetherium", color: ["rgb(100,149,237)", "rgb(135,206,250)"] }, // New Material
 ].map((material, index) => ({
