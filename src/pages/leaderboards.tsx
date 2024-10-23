@@ -1,10 +1,23 @@
-import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card";
+import {
+  HoverCard,
+  HoverCardContent,
+  HoverCardTrigger,
+} from "@/components/ui/hover-card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { abbreviateNumber, getLevelFromExperience } from "@/lib/func";
 import { api } from "@/utils/api";
-import { CalendarIcon, SwordIcon, CoinsIcon, CloverIcon, Trophy, Medal, Crown } from "lucide-react";
+import {
+  CalendarIcon,
+  SwordIcon,
+  CoinsIcon,
+  CloverIcon,
+  Trophy,
+  Medal,
+  Crown,
+} from "lucide-react";
 import Layout from "@/components/layout";
 import { cn } from "@/lib/utils";
+import Link from "next/link";
 
 const RankIcon = ({ position }: { position: number }) => {
   if (position === 1) return <Crown className="h-6 w-6 text-yellow-500" />;
@@ -28,14 +41,18 @@ export default function Leaderboards() {
 
   if (isLoading) return <Layout isLoading />;
 
-  const sortedUsers = data?.sort((a, b) => parseInt(b.experience) - parseInt(a.experience));
+  const sortedUsers = data?.sort(
+    (a, b) => parseInt(b.experience) - parseInt(a.experience),
+  );
 
   return (
     <Layout>
       <div className="container mx-auto max-w-4xl px-4 py-6">
         <div className="mb-8 text-center">
           <h1 className="text-4xl font-bold">Leaderboards</h1>
-          <p className="text-muted-foreground">Top Bladesmiths ranking by level</p>
+          <p className="text-muted-foreground">
+            Top Bladesmiths ranking by level
+          </p>
         </div>
 
         <div className="space-y-4">
@@ -44,15 +61,14 @@ export default function Leaderboards() {
               key={user.id}
               className={cn(
                 "group relative overflow-hidden rounded-lg border bg-card/50 p-4 transition-all hover:bg-card",
-                index < 3 ? "border-purple-500/20" : "border-border/50"
+                index < 3 ? "border-purple-500/20" : "border-border/50",
               )}
             >
-              {/* Animated background for top 3 */}
               {index < 3 && (
                 <div className="absolute inset-0 -z-10 bg-gradient-to-r from-purple-500/10 to-transparent opacity-0 transition-opacity group-hover:opacity-100" />
               )}
 
-              <div className="flex items-center gap-4">
+              <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
                 {/* Rank section */}
                 <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-muted">
                   <RankIcon position={index + 1} />
@@ -64,19 +80,27 @@ export default function Leaderboards() {
                     <div className="flex items-center gap-3">
                       <Avatar className="h-12 w-12 border-2 border-purple-500/20">
                         <AvatarImage src={user.image ?? undefined} />
-                        <AvatarFallback>{user.name?.slice(0, 2).toUpperCase()}</AvatarFallback>
+                        <AvatarFallback>
+                          {user.name?.slice(0, 2).toUpperCase()}
+                        </AvatarFallback>
                       </Avatar>
                       <div className="text-left">
                         <div className="flex items-center gap-2">
-                          <span className="font-bold">{user.name}</span>
+                          <Link
+                            href={`/profiles/${user.id}`}
+                            className="font-bold"
+                          >
+                            {user.name}
+                          </Link>
                           {user.vip && (
-                            <span className="rounded bg-gradient-to-r from-yellow-400 to-yellow-600 px-1.5 py-0.5 text-xs font-bold text-black">
+                            <span className="rounded bg-gradient-to-r from-purple-400 to-purple-600 px-1.5 py-0.5 text-xs font-bold text-black">
                               VIP
                             </span>
                           )}
                         </div>
                         <div className="text-sm text-muted-foreground">
-                          Level {getLevelFromExperience(Number(user.experience))}
+                          Level{" "}
+                          {getLevelFromExperience(Number(user.experience))}
                         </div>
                       </div>
                     </div>
@@ -88,15 +112,19 @@ export default function Leaderboards() {
                     <div className="flex justify-between space-x-4">
                       <Avatar className="h-28 w-28">
                         <AvatarImage src={user.image ?? undefined} />
-                        <AvatarFallback>{user.name?.slice(0, 2).toUpperCase()}</AvatarFallback>
+                        <AvatarFallback>
+                          {user.name?.slice(0, 2).toUpperCase()}
+                        </AvatarFallback>
                       </Avatar>
                       <div className="space-y-2">
-                        <h4 className={cn(
-                          "flex items-center gap-x-2 font-semibold",
-                          user.vip && "text-yellow-500"
-                        )}>
+                        <h4
+                          className={cn(
+                            "flex items-center gap-x-2 font-semibold",
+                            user.vip && "text-purple-500",
+                          )}
+                        >
                           {user.vip && (
-                            <span className="rounded bg-gradient-to-r from-yellow-400 to-yellow-600 px-1 text-xs font-bold text-black">
+                            <span className="rounded bg-gradient-to-r from-purple-400 to-purple-600 px-1 text-xs font-bold text-black">
                               VIP
                             </span>
                           )}
@@ -126,14 +154,18 @@ export default function Leaderboards() {
                 </HoverCard>
 
                 {/* Stats section */}
-                <div className="ml-auto flex items-center gap-6">
+                <div className="mt-2 flex items-center gap-4 sm:ml-auto sm:mt-0 sm:gap-6">
                   <div className="flex items-center gap-2">
                     <CoinsIcon className="h-4 w-4 text-yellow-500" />
-                    <span className="text-sm font-medium">{abbreviateNumber(user.money)}</span>
+                    <span className="text-sm font-medium">
+                      {abbreviateNumber(user.money)}
+                    </span>
                   </div>
                   <div className="flex items-center gap-2">
                     <CloverIcon className="h-4 w-4 text-green-500" />
-                    <span className="text-sm font-medium">{Number(user.luck)}</span>
+                    <span className="text-sm font-medium">
+                      {Number(user.luck)}
+                    </span>
                   </div>
                 </div>
               </div>

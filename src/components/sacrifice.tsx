@@ -11,9 +11,8 @@ import {
 import { Button } from "./ui/button";
 import { api } from "@/utils/api";
 import { toast } from "sonner";
-import type { Dispatch, SetStateAction } from "react";
+import { type Dispatch, type SetStateAction } from "react";
 import { LoaderCircle, Skull, Sparkles, Star } from "lucide-react";
-import { getSacrificeRerolls } from "@/data/common";
 import { abbreviateNumber } from "@/lib/func";
 
 const SacrificeModal = ({
@@ -54,8 +53,8 @@ const SacrificeModal = ({
             Sacrifice Sword
           </DialogTitle>
           <DialogDescription className="text-base">
-            Are you sure you want to sacrifice this sword? You&apos;ll receive the
-            following rewards:
+            Are you sure you want to sacrifice this sword? You&apos;ll receive
+            the following rewards:
           </DialogDescription>
         </DialogHeader>
 
@@ -66,16 +65,7 @@ const SacrificeModal = ({
               <Sparkles className="mr-3 h-6 w-6 text-blue-500" />
               <div>
                 <div className="font-semibold">Essence</div>
-                <div className="text-sm text-muted-foreground">
-                  +{" "}
-                  {getSacrificeRerolls(
-                    sword?.material ?? "",
-                    sword?.rarity ?? "",
-                    sword?.quality ?? "",
-                    sword?.aura ?? undefined,
-                    sword?.effect ?? undefined,
-                  )}
-                </div>
+                <div className="text-sm text-muted-foreground">+ {sword?.essence}</div>
               </div>
             </div>
 
@@ -121,24 +111,24 @@ const SacrificeModal = ({
 
         <DialogFooter>
           <DialogTrigger asChild>
-          <Button
-            variant="destructive"
-            className="w-full"
-            onClick={handleSacrificeSword}
-            disabled={isSacrificing}
-          >
-            {isSacrificing ? (
-              <div className="flex items-center justify-center">
-                <LoaderCircle className="mr-2 h-4 w-4 animate-spin" />
-                Sacrificing...
-              </div>
-            ) : (
-              <>
-                <Skull className="mr-2 h-4 w-4" />
-                Confirm Sacrifice
-              </>
-            )}
-          </Button>
+            <Button
+              variant="destructive"
+              className="w-full"
+              onClick={handleSacrificeSword}
+              disabled={isSacrificing}
+            >
+              {isSacrificing ? (
+                <div className="flex items-center justify-center">
+                  <LoaderCircle className="mr-2 h-4 w-4 animate-spin" />
+                  Sacrificing...
+                </div>
+              ) : (
+                <>
+                  <Skull className="mr-2 h-4 w-4" />
+                  Confirm Sacrifice
+                </>
+              )}
+            </Button>
           </DialogTrigger>
         </DialogFooter>
       </DialogContent>

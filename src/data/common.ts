@@ -108,18 +108,18 @@ export function getSwordAura(aura: string): string {
   }
 }
 
-export function getSacrificeRerolls(
-  iMaterial: string,
-  iRarity: string,
-  iQuality: string,
-  iAura?: string,
-  iEffect?: string,
-): number {
-  const material = Materials.find((m) => m.name === iMaterial);
-  const quality = Qualities.find((q) => q.name === iQuality);
-  const rarity = Rarities.find((r) => r.name === iRarity);
-  const aura = Auras.find((a) => a.name === iAura);
-  const effect = Effects.find((e) => e.name === iEffect);
+export function getSacrificeRerolls(sword: {
+  material: string;
+  quality: string;
+  rarity: string;
+  aura?: string;
+  effect?: string;
+}): number {
+  const material = Materials.find((m) => m.name === sword.material);
+  const quality = Qualities.find((q) => q.name === sword.quality);
+  const rarity = Rarities.find((r) => r.name === sword.rarity);
+  const aura = Auras.find((a) => a.name === sword.aura);
+  const effect = Effects.find((e) => e.name === sword.effect);
 
   if (!material || !quality || !rarity) return 0;
 

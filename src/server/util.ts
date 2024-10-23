@@ -2,6 +2,7 @@ import { type Prisma, type User } from "@prisma/client";
 import { getLevelFromExperience } from "@/lib/func";
 import { db } from "@/server/db";
 import {
+  getSacrificeRerolls,
   luckFromLevel,
   probability,
   type Property,
@@ -149,12 +150,18 @@ export async function generateSword(user: User) {
   );
 
   const experience = Math.floor(
-    value *
-      0.14 *
+    (value / 14) *
       (enchantExperience || 1) *
-      config.experienceMultiplier *
-      (1 + userLevel * 0.02),
-  );
+      (config.experienceMultiplier || 1),
+  ); // 14% of value
+
+  const essence = getSacrificeRerolls({
+    material: material.name,
+    rarity: rarity.name,
+    quality: quality.name,
+    aura: aura.name,
+    effect: effect.name,
+  });
 
   return {
     material: material?.name,
@@ -167,6 +174,7 @@ export async function generateSword(user: User) {
     luck: enchantLuck || 1,
     experience,
     enchants,
+    essence,
   };
 }
 

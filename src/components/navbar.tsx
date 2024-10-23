@@ -7,7 +7,7 @@ import {
   navigationMenuTriggerStyle,
 } from "./ui/navigation-menu";
 import { Button } from "./ui/button";
-import { Menu, Swords } from "lucide-react";
+import { Crown, Menu, Swords } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -22,6 +22,13 @@ import type { User } from "@prisma/client";
 import { useEffect, useState } from "react";
 import { api } from "@/utils/api";
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "./ui/hover-card";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
 
 export default function Navbar() {
   const [user, setUser] = useState<User | null>(null);
@@ -47,12 +54,10 @@ export default function Navbar() {
 
   const isAuthenticated = status === "authenticated";
 
-  console.log(session?.user.image)
-
   return (
     <nav className="container mx-auto mb-10 flex items-center justify-between p-3">
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
+      <Sheet>
+        <SheetTrigger asChild>
           <Button
             aria-label="Open Menu"
             size="icon"
@@ -61,32 +66,50 @@ export default function Navbar() {
           >
             <Menu />
           </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent>
-          {links.map(
-            (link) =>
-              (!link.auth || isAuthenticated) && (
-                <DropdownMenuItem key={link.title} asChild>
-                  <Link href={link.href}>{link.title}</Link>
-                </DropdownMenuItem>
-              ),
-          )}
-          {isAuthenticated && (
-            <>
-              <DropdownMenuItem asChild>
-                <Link href={`/profiles/${user?.id}`}>Profile</Link>
-              </DropdownMenuItem>
-            </>
-          )}
-          {isAuthenticated && !user?.vip && (
-            <DropdownMenuItem asChild>
-              <Link href="/vip">VIP</Link>
-            </DropdownMenuItem>
-          )}
-        </DropdownMenuContent>
-      </DropdownMenu>
-      <Link href="/" className="flex items-center text-xl font-bold">
-        <Swords className="mr-2 fill-white" />
+        </SheetTrigger>
+        <SheetContent side="left">
+          <SheetHeader>
+            <SheetTitle>
+              <div className="flex items-center gap-2 text-purple-500">
+                <Swords className="fill-purple-500" />
+                BladeForge
+              </div>
+            </SheetTitle>
+          </SheetHeader>
+          <div className="mt-4 flex flex-col gap-2">
+            {links.map(
+              (link) =>
+                (!link.auth || isAuthenticated) && (
+                  <Link
+                    key={link.title}
+                    href={link.href}
+                    className="w-full rounded-md p-2 hover:bg-accent hover:text-accent-foreground"
+                  >
+                    {link.title}
+                  </Link>
+                ),
+            )}
+            {isAuthenticated && (
+              <Link
+                href={`/profiles/${user?.id}`}
+                className="w-full rounded-md p-2 hover:bg-accent hover:text-accent-foreground"
+              >
+                Profile
+              </Link>
+            )}
+            {isAuthenticated && !user?.vip && (
+              <Link
+                href="/vip"
+                className="w-full rounded-md p-2 hover:bg-accent hover:text-accent-foreground"
+              >
+                VIP
+              </Link>
+            )}
+          </div>
+        </SheetContent>
+      </Sheet>
+      <Link href="/" className="flex items-center text-xl font-bold text-purple-500">
+        <Swords className="mr-2 fill-purple-500" />
         BladeForge
       </Link>
       <NavigationMenu className="hidden lg:block">
@@ -128,37 +151,30 @@ export default function Navbar() {
           {user?.vip && (
             <HoverCard>
               <HoverCardTrigger asChild>
-                <p className="hidden rounded-full bg-gradient-to-br from-yellow-300 to-yellow-800 px-3 py-1 text-xs font-bold text-black lg:block">
-                  VIP
-                </p>
+                <div className="hidden cursor-pointer items-center gap-1 rounded-full bg-gradient-to-r from-purple-600 to-violet-600 px-3 py-1 text-xs font-semibold text-white lg:flex">
+                  <Crown className="h-3 w-3" />
+                  <span>VIP</span>
+                </div>
               </HoverCardTrigger>
-              <HoverCardContent className="w-80 bg-gradient-to-br from-yellow-600 to-yellow-900">
-                <div className="space-y-1">
-                  <ul className="space-y-1.5 text-sm text-foreground/80">
-                    <li>
-                      <strong className="font-semibold text-white">
-                        30% Luck Boost:
-                      </strong>{" "}
-                      Increase your chances of forging rare and powerful swords.
+              <HoverCardContent className="w-80">
+                <div className="space-y-2">
+                  <h4 className="text-sm font-semibold">VIP Benefits</h4>
+                  <ul className="text-sm text-muted-foreground">
+                    <li className="flex items-center gap-2">
+                      <span className="text-purple-500">•</span>
+                      30% Luck Boost
                     </li>
-                    <li>
-                      <strong className="font-semibold text-white">
-                        Halfed Ascension Speeds and Generation Speeds:
-                      </strong>{" "}
-                      Climb the ranks faster and show off your skills.
+                    <li className="flex items-center gap-2">
+                      <span className="text-purple-500">•</span>
+                      Halved Speeds
                     </li>
-                    <li>
-                      <strong className="font-semibold text-white">
-                        20 Extra Sword Storage Slots:
-                      </strong>{" "}
-                      Keep more of your best creations!
+                    <li className="flex items-center gap-2">
+                      <span className="text-purple-500">•</span>
+                      20 Extra Slots
                     </li>
-                    <li>
-                      <strong className="font-semibold text-white">
-                        Special VIP Nametag:
-                      </strong>{" "}
-                      Stand out on the leaderboard and your profile with a
-                      unique badge.
+                    <li className="flex items-center gap-2">
+                      <span className="text-purple-500">•</span>
+                      Special Badge
                     </li>
                   </ul>
                 </div>

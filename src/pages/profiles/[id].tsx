@@ -72,7 +72,7 @@ export default function Profile() {
               </p>
               <div className="mt-2">
                 {user?.vip && (
-                  <span className="mr-2 rounded bg-yellow-500 px-2 py-1 text-xs font-bold text-white">
+                  <span className="mr-2 rounded bg-purple-500 px-2 py-1 text-xs font-bold text-white">
                     VIP
                   </span>
                 )}
@@ -187,7 +187,7 @@ export default function Profile() {
               <SwordDisplay
                 sword={
                   user.swords.sort(
-                    (a, b) => parseInt(b.value) - parseInt(a.value),
+                    (a, b) => Number(b.value) - Number(a.value),
                   )[0]!
                 }
                 username={user.name!}

@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
 import { TRPCError } from "@trpc/server";
-import { totalLuck } from "@/server/util";
+import { globalConfig, totalLuck } from "@/server/util";
 
 const DIFFICULTY_MULTIPLIER = 1.18;
 const COOLDOWN_DURATION = 2000;
@@ -219,4 +219,10 @@ export const userRouter = createTRPCRouter({
         });
       }
     }),
+
+  getGlobalBoosts: protectedProcedure.query(async () => {
+    const config = await globalConfig();
+
+    return config;
+  }),
 });

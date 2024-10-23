@@ -1,4 +1,6 @@
-export type Rarity = {
+import type { Property } from "./common";
+
+interface Rarity extends Property {
   name: string;
   color: string | string[];
   chance: number;

@@ -5,7 +5,7 @@ import { z } from "zod";
 import { env } from "@/env";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
 import { TRPCError } from "@trpc/server";
-import { abbreviateNumber } from "@/lib/func";
+import { abbreviateNumber, toPlainString } from "@/lib/func";
 import {
   generateSword,
   getProperty,
@@ -97,6 +97,16 @@ export const swordRouter = createTRPCRouter({
       sword.effect = undefined!;
     }
 
+    if (sword.essence === 0) {
+      sword.essence = getSacrificeRerolls({
+        material: sword.material,
+        quality: sword.quality,
+        rarity: sword.rarity,
+        aura: sword.aura,
+        effect: sword.effect,
+      });
+    }
+
     const generatedSword = await ctx.db.sword.create({
       data: {
         ...sword,
@@ -148,61 +158,28 @@ export const swordRouter = createTRPCRouter({
         }
 
         // Validate and parse the string values to BigInt
-        if (!sword.value || !sword.experience || !user.money || !user.experience) {
+        if (
+          !sword.value ||
+          !sword.experience ||
+          !user.money ||
+          !user.experience
+        ) {
           throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
             message: "Invalid sword or user data",
           });
         }
 
-        // Parse strings to BigInt, with additional error handling
-        let swordValue: bigint, swordExperience: bigint, userMoney: bigint, userExperience: bigint;
-        
-        try {
-          swordValue = BigInt(sword.value);
-          swordExperience = BigInt(sword.experience);
-          userMoney = BigInt(user.money);
-          userExperience = BigInt(user.experience);
-        } catch (e) {
-          console.error("BigInt conversion error:", e);
-          throw new TRPCError({
-            code: "INTERNAL_SERVER_ERROR",
-            message: "Error processing large numbers",
-          });
-        }
-
-        // Calculate new totals first to validate them
-        const newMoney = userMoney + swordValue;
-        const newExperience = userExperience + swordExperience;
-
-        // Log the values for debugging
-        console.log({
-          originalValues: {
-            swordValue: sword.value,
-            swordExp: sword.experience,
-            userMoney: user.money,
-            userExp: user.experience
-          },
-          convertedBigInts: {
-            swordValue: swordValue.toString(),
-            swordExp: swordExperience.toString(),
-            userMoney: userMoney.toString(),
-            userExp: userExperience.toString()
-          },
-          newTotals: {
-            money: newMoney.toString(),
-            exp: newExperience.toString()
-          }
-        });
-
         // Perform the transaction with the validated values
         const [updatedUser] = await ctx.db.$transaction([
           ctx.db.user.update({
             where: { id: ctx.session.user.id },
             data: {
-              money: newMoney.toString(),
+              money: toPlainString(Number(user.money) + Number(sword.value)),
               swordId: null,
-              experience: newExperience.toString(),
+              experience: toPlainString(
+                Number(user.experience) + Number(sword.experience),
+              ),
             },
           }),
           ctx.db.sword.delete({ where: { id: input } }),
@@ -418,6 +395,14 @@ export const swordRouter = createTRPCRouter({
               (attemptedProperty.damageMultiplier ?? 1)
             : Number(sword.damage);
         const newExperience = Math.floor(newValue * 0.1);
+        const newEssence = getSacrificeRerolls({
+          [ascending]: attemptedProperty.name,
+          material: sword.material ?? "",
+          quality: sword.quality ?? "",
+          rarity: sword.rarity ?? "",
+          aura: sword.aura ?? undefined,
+          effect: sword.effect ?? undefined,
+        });
 
         const updatedSword = await ctx.db.sword.update({
           where: { id: sword.id },
@@ -426,6 +411,7 @@ export const swordRouter = createTRPCRouter({
             value: String(Math.round(newValue)),
             damage: String(Math.round(newDamage)),
             experience: String(newExperience),
+            essence: newEssence,
           },
         });
 
@@ -603,22 +589,22 @@ export const swordRouter = createTRPCRouter({
       });
     }
 
-    const essence = getSacrificeRerolls(
-      sword.material,
-      sword.rarity,
-      sword.quality,
-      sword.aura ?? undefined,
-      sword.effect ?? undefined,
-    );
+    const essence = getSacrificeRerolls({
+      material: sword.material,
+      quality: sword.quality,
+      rarity: sword.rarity,
+      aura: sword.aura ?? undefined,
+      effect: sword.effect ?? undefined,
+    });
 
     const [updatedUser] = await ctx.db.$transaction([
       ctx.db.user.update({
         where: { id: ctx.session.user.id },
         data: {
           essence: { increment: essence },
-          experience: {
-            set: String(parseInt(user.experience) + parseInt(sword.experience)),
-          },
+          experience: toPlainString(
+            Number(user.experience) + Number(sword.experience),
+          ),
           swordId: null,
           lastSacrificeAt: now,
         },

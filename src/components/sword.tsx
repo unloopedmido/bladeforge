@@ -20,7 +20,6 @@ interface SwordProps {
 }
 
 function Content({ sword, username }: SwordProps) {
-  console.log(sword.value)
   return (
     <div
       className="relative flex h-[350px] w-[350px] flex-col p-3"

@@ -22,14 +22,21 @@ const MyApp: AppType<{ session: Session | null }> = ({
     <SessionProvider refetchOnWindowFocus={false} session={session}>
       <Head>
         <title>BladeForge - Your Idle Factory</title>
-        <meta name="title" content="BladeForge - Forge Swords and Upgrade Your Luck in This Idle Factory Game" />
+        <meta name="google-adsense-account" content="ca-pub-1225793953305332" />
+        <meta
+          name="title"
+          content="BladeForge - Forge Swords and Upgrade Your Luck in This Idle Factory Game"
+        />
         <meta
           name="description"
           content="BladeForge is a web-based idle game where you forge unique swords, upgrade your luck, and dominate the leaderboards. Start your bladesmithing adventure today!"
         />
         <meta property="og:type" content="website" />
         <meta property="og:url" content="https://cored.studio/" />
-        <meta property="og:title" content="BladeForge - Forge Swords and Upgrade Your Luck in This Idle Factory Game" />
+        <meta
+          property="og:title"
+          content="BladeForge - Forge Swords and Upgrade Your Luck in This Idle Factory Game"
+        />
         <meta
           property="og:description"
           content="BladeForge is a web-based idle game where you forge unique swords, upgrade your luck, and dominate the leaderboards. Start your bladesmithing adventure today!"

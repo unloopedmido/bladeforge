@@ -21,12 +21,18 @@ export default function Forge() {
     },
   );
 
+  const { data: globalBoosts, isLoading: isGlobalBoostsLoading } =
+    api.user.getGlobalBoosts.useQuery(undefined, {
+      refetchOnWindowFocus: false,
+      refetchOnMount: true,
+    });
+
   useEffect(() => {
     setSword(userData?.swords.find((s) => s.id === userData.swordId) ?? null);
     setUser(userData ?? null);
   }, [userData]);
 
-  if (isUserLoading) {
+  if (isUserLoading || isGlobalBoostsLoading) {
     return <Layout isLoading />;
   }
 

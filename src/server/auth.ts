@@ -6,7 +6,7 @@ import {
   type NextAuthOptions,
 } from "next-auth";
 import { type Adapter } from "next-auth/adapters";
-import DiscordProvider from "next-auth/providers/discord";
+import DiscordProvider, { type DiscordProfile } from "next-auth/providers/discord";
 
 import { env } from "@//env";
 import { db } from "@//server/db";
@@ -38,17 +38,28 @@ declare module "next-auth" {
  * @see https://next-auth.js.org/configuration/options
  */
 export const authOptions: NextAuthOptions = {
-  
   callbacks: {
     session: ({ session, user }) => {
       return {
         ...session,
         user: {
           ...session.user,
-          image: user.image,
           id: user.id,
         },
       };
+    },
+  },
+  events: {
+    async signIn({ user, profile }) {
+      if (user && profile) {
+        await db.user.update({
+          where: { id: user.id },
+          data: {
+            name: user.name,
+            image: user.image,
+          },
+        });
+      }
     },
   },
   adapter: PrismaAdapter(db) as Adapter,
@@ -57,7 +68,15 @@ export const authOptions: NextAuthOptions = {
       clientId: env.DISCORD_CLIENT_ID,
       clientSecret: env.DISCORD_CLIENT_SECRET,
       httpOptions: {
-        timeout: 10*1000
+        timeout: 10 * 1000,
+      },
+      profile(profile: DiscordProfile) {
+        return {
+          id: profile.id,
+          name: profile.username,
+          email: profile.email,
+          image: `https://cdn.discordapp.com/avatars/${profile.id}/${profile.avatar}`,
+        };
       }
     }),
     /**
