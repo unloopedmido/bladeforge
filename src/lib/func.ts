@@ -70,3 +70,8 @@ export function abbreviateNumber(string: string) {
 export function toPlainString(num: number): string {
   return num.toLocaleString("fullwide", { useGrouping: false });
 }
+
+export function hexToDecimal(hex: string): number {
+  const cleanHex = hex.startsWith("#") ? hex.slice(1) : hex;
+  return parseInt(cleanHex, 16);
+}

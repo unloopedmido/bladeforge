@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { api } from "@/utils/api";
-import { type Sword as SwordType, type User as UserType } from "@prisma/client";
+import { type Sword as SwordType, } from "@prisma/client";
 import { toast } from "sonner";
 import UpgradeLuckDialog from "./upgradeluckdialog";
 import AscenderSheet from "./ascendersheet";
@@ -11,12 +11,13 @@ import SacrificeModal from "./sacrifice";
 
 import type { Dispatch, SetStateAction } from "react";
 import { Card, CardContent } from "./ui/card";
+import type { ClientUserType } from "@/data/common";
 
 interface ActionButtonsProps {
   sword: SwordType | null;
   setSword: Dispatch<SetStateAction<SwordType | null>>;
-  user: UserType | null;
-  setUser: Dispatch<SetStateAction<UserType | null>>;
+  user: ClientUserType | null;
+  setUser: Dispatch<SetStateAction<ClientUserType | null>>;
 }
 
 export default function ActionButtons({

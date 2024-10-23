@@ -1,4 +1,4 @@
-import type { Sword as SwordType, User as UserType } from "@prisma/client";
+import type { Sword as SwordType } from "@prisma/client";
 import {
   Dialog,
   DialogContent,
@@ -14,11 +14,12 @@ import { api } from "@/utils/api";
 import { useEffect, useState } from "react";
 import { abbreviateNumber } from "@/lib/func";
 import { ArrowUp, Hammer, LoaderCircle, Shield, Sparkles } from "lucide-react";
+import type { ClientUserType } from "@/data/common";
 
 interface AscenderSheetProps {
   sword: SwordType | null;
   setSword: (sword: SwordType | null) => void;
-  user: UserType | null;
+  user: ClientUserType | null;
   disabled: boolean;
 }
 
@@ -48,19 +49,6 @@ export default function AscenderSheet({
       setCooldown(user?.vip ? 500 : 1000);
     },
   });
-
-  const getPropertyIcon = (property: "rarity" | "material" | "quality") => {
-    switch (property) {
-      case 'rarity':
-        return <Sparkles className="h-5 w-5" />;
-      case 'quality':
-        return <Shield className="h-5 w-5" />;
-      case 'material':
-        return <Hammer className="h-5 w-5" />;
-      default:
-        return null;
-    }
-  };
 
   // Handle cooldown
   useEffect(() => {

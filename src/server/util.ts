@@ -1,4 +1,3 @@
-import { type Prisma, type User } from "@prisma/client";
 import { getLevelFromExperience } from "@/lib/func";
 import { db } from "@/server/db";
 import {
@@ -6,6 +5,7 @@ import {
   luckFromLevel,
   probability,
   type Property,
+  type UserType,
   weekendLuck,
 } from "@/data/common";
 import Materials from "@/data/materials";
@@ -14,6 +14,7 @@ import Qualities from "@/data/qualities";
 import Auras from "@/data/auras";
 import Enchants, { type Enchant } from "@/data/enchants";
 import Effects from "@/data/effects";
+
 
 export async function globalConfig() {
   const config = await db.config.findFirst();
@@ -29,9 +30,7 @@ export async function globalConfig() {
   };
 }
 
-export async function totalLuck(
-  user: Prisma.UserGetPayload<{ include: { swords: true } }>,
-): Promise<number> {
+export async function totalLuck(user: UserType): Promise<number> {
   const level = getLevelFromExperience(Number(user.experience));
   const vip = user.vip ? 1.3 : 1;
   const levelLuck = luckFromLevel(level);
@@ -64,14 +63,18 @@ export async function totalLuck(
 
 export async function getProperty(
   array: Property[],
-  user: User,
+  user: UserType,
   nonLuck?: boolean,
 ): Promise<Property> {
   const sortedArray = array.sort((a, b) => b.chance - a.chance);
 
-  const userTotalLuck = await totalLuck(
-    user as Prisma.UserGetPayload<{ include: { swords: true } }>,
-  );
+  const userTotalLuck = await totalLuck({
+    luck: user.luck,
+    experience: user.experience,
+    vip: user.vip,
+    swordId: user.swordId,
+    swords: user.swords,
+  });
 
   for (const property of sortedArray) {
     if (probability(Number(property.chance), nonLuck ? 1 : userTotalLuck)) {
@@ -82,7 +85,7 @@ export async function getProperty(
   return sortedArray[sortedArray.length - 1]!;
 }
 
-export async function generateSword(user: User) {
+export async function generateSword(user: UserType) {
   const config = await globalConfig();
 
   const material = await getProperty(Materials, user);
@@ -231,3 +234,32 @@ export function getRandomEffect(): Property {
   // but it's here as a fallback
   return Effects[Effects.length - 1]!;
 }
+
+interface WebhookEmbed {
+  title: string;
+  description?: string;
+  color?: number;
+  fields?: Array<{ name: string; value: string; inline?: boolean }>;
+  timestamp?: string;
+  footer?: { text: string; icon_url?: string };
+  thumbnail?: { url: string };
+}
+
+export const sendDiscordWebhook = async (
+  webhookUrl: string,
+  embeds: WebhookEmbed[],
+) => {
+  try {
+    const response = await fetch(webhookUrl, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ embeds }),
+    });
+
+    if (!response.ok) {
+      throw new Error(`Discord webhook failed: ${response.statusText}`);
+    }
+  } catch (error) {
+    console.error("Failed to send Discord webhook:", error);
+  }
+};

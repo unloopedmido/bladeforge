@@ -14,12 +14,15 @@ const Qualities: Quality[] = [
   "Scratched",
   "Worn",
   "Decent",
+  "Sharp", // New Quality
   "Adequate",
   "Good",
   "Fine",
   "Very Good",
+  "Balanced", // New Quality
   "Impressive", // New Quality
   "Remarkable", // New Quality
+  "Polished", // New Quality
   "Great",
   "Superb",
   "Excellent",
@@ -30,14 +33,15 @@ const Qualities: Quality[] = [
   "Perfect",
   "Legendary",
   "Divine", // New Quality
+  "Durable", // New Quality
   "Godly",
   "Otherworldly",
   "Ascended",
   "Transcendent",
   "Exquisite",
-  "Unparalleled",
   "Ultimate",
-  "Mythical" // New Quality
+  "Mythical", // New Quality
+  "Mastercrafted", // New Quality
 ].map((quality, index) => ({
   name: quality,
   chance: +Math.pow(3.2, index).toFixed(2), // 320% increase per quality level

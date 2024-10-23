@@ -70,7 +70,7 @@ export default function Navbar() {
         <SheetContent side="left">
           <SheetHeader>
             <SheetTitle>
-              <div className="flex items-center gap-2 text-purple-500">
+              <div className="flex items-center gap-2 text-purple-400">
                 <Swords className="fill-purple-500" />
                 BladeForge
               </div>
@@ -108,7 +108,7 @@ export default function Navbar() {
           </div>
         </SheetContent>
       </Sheet>
-      <Link href="/" className="flex items-center text-xl font-bold text-purple-500">
+      <Link href="/" className="flex items-center text-xl font-bold text-purple-400">
         <Swords className="mr-2 fill-purple-500" />
         BladeForge
       </Link>

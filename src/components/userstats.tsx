@@ -4,7 +4,6 @@ import {
   getExperienceForNextLevel,
   getLevelFromExperience,
 } from "@/lib/func";
-import { type User as UserType } from "@prisma/client";
 import { Star } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import { Card, CardContent } from "@/components/ui/card";
@@ -14,10 +13,10 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { getForgingTitle } from "@/data/common";
+import { type ClientUserType, getForgingTitle } from "@/data/common";
 
 interface UserStatsProps {
-  user: UserType | null;
+  user: ClientUserType | null;
 }
 
 export default function UserStats({ user }: UserStatsProps) {

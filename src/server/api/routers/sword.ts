@@ -5,11 +5,12 @@ import { z } from "zod";
 import { env } from "@/env";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
 import { TRPCError } from "@trpc/server";
-import { abbreviateNumber, toPlainString } from "@/lib/func";
+import { abbreviateNumber, hexToDecimal, toPlainString } from "@/lib/func";
 import {
   generateSword,
   getProperty,
   getRandomEnchant,
+  sendDiscordWebhook,
   totalLuck,
 } from "@/server/util";
 import Enchants, { type Enchant } from "@/data/enchants";
@@ -23,6 +24,7 @@ const userCache = new Map<
     lastGeneration?: Date;
     lastLuckUpgrade?: Date;
     lastSell?: Date;
+    lastReroll?: Date;
   }
 >();
 
@@ -318,10 +320,18 @@ export const swordRouter = createTRPCRouter({
     .mutation(async ({ ctx, input }) => {
       const { user, sword } = await userWithSword(ctx);
 
+      // Validate user and sword
+      if (!user || !sword) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: !user ? "User not found" : "No sword equipped",
+        });
+      }
+
+      // Check cooldown
       const now = Date.now();
       const cachedUser = userCache.get(user.id);
       const lastAscend = cachedUser?.lastAscend?.getTime() ?? 0;
-
       const cooldown = user.vip ? 500 : 1000;
 
       if (lastAscend && now - lastAscend < cooldown) {
@@ -331,112 +341,117 @@ export const swordRouter = createTRPCRouter({
         });
       }
 
-      if (!userWithSword) {
-        throw new TRPCError({
-          code: "NOT_FOUND",
-          message: "User not found",
-        });
-      }
-
-      if (!sword) {
-        throw new TRPCError({
-          code: "NOT_FOUND",
-          message: "No sword equipped",
-        });
-      }
-
-      const ascending: "material" | "quality" | "rarity" = input;
+      // Get properties for ascension
+      const ascending = input;
       const ascendingArray = {
         material: Materials,
         quality: Qualities,
         rarity: Rarities,
-      };
+      }[ascending];
 
-      const currentProperty = ascendingArray[ascending].find(
+      const currentProperty = ascendingArray.find(
         (p) => p.name === sword[ascending],
       );
 
       const userTotalLuck = await totalLuck(user);
-      const attemptedProperty = await getProperty(
-        ascendingArray[ascending],
-        user,
-      );
-
+      const attemptedProperty = await getProperty(ascendingArray, user);
       const RNGLuck = attemptedProperty.chance / userTotalLuck;
 
-      if (attemptedProperty.chance > (currentProperty?.chance ?? 0)) {
-        if (RNGLuck > 2000) {
-          const webhookURI = env.DISCORD_WEBHOOK_URI;
-          if (webhookURI) {
-            void fetch(webhookURI, {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({
-                embeds: [
-                  {
-                    title: `🎉 ${user.name} has found a ${attemptedProperty.name}!`,
-                    description: `Base Chance: 1/${abbreviateNumber(String(attemptedProperty.chance))}\nCurrent Chance: 1/${abbreviateNumber(String(RNGLuck))}`,
-                    timestamp: new Date().toISOString(),
-                  },
-                ],
-              }),
-            });
-          }
-        }
-
-        const newValue =
-          (Number(sword.value) / (currentProperty?.valueMultiplier ?? 1)) *
-          attemptedProperty.valueMultiplier;
-        const newDamage =
-          ascending !== "material" &&
-          currentProperty &&
-          "damageMultiplier" in currentProperty
-            ? (Number(sword.damage) / currentProperty.damageMultiplier) *
-              (attemptedProperty.damageMultiplier ?? 1)
-            : Number(sword.damage);
-        const newExperience = Math.floor(newValue * 0.1);
-        const newEssence = getSacrificeRerolls({
-          [ascending]: attemptedProperty.name,
-          material: sword.material ?? "",
-          quality: sword.quality ?? "",
-          rarity: sword.rarity ?? "",
-          aura: sword.aura ?? undefined,
-          effect: sword.effect ?? undefined,
-        });
-
-        const updatedSword = await ctx.db.sword.update({
-          where: { id: sword.id },
-          data: {
-            [ascending]: attemptedProperty.name,
-            value: String(Math.round(newValue)),
-            damage: String(Math.round(newDamage)),
-            experience: String(newExperience),
-            essence: newEssence,
-          },
-        });
-
+      // Check if ascension is possible
+      if (attemptedProperty.chance <= (currentProperty?.chance ?? 0)) {
+        // Update lastAscend even if the ascension failed
         userCache.set(ctx.session.user.id, {
           ...cachedUser,
           lastAscend: new Date(),
         });
 
-        return {
-          sword: updatedSword,
-          property: attemptedProperty,
-          luck: RNGLuck,
-        };
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: `Failed to ascend to ${attemptedProperty.name} (1/${abbreviateNumber(String(RNGLuck))}) as the current ${input} is better or same`,
+        });
       }
 
-      // Update lastAscend even if the ascension failed
+      // Send webhook for rare finds
+      try {
+        if (RNGLuck > 2000) {
+          const webhookURI = env.DISCORD_WEBHOOK_URI;
+          if (webhookURI) {
+            let propertyColor: number | undefined;
+
+            if (attemptedProperty.color) {
+              if (Array.isArray(attemptedProperty.color)) {
+                propertyColor = hexToDecimal(attemptedProperty.color[0]!);
+              } else {
+                propertyColor = hexToDecimal(attemptedProperty.color);
+              }
+            }
+
+            void sendDiscordWebhook(webhookURI, [
+              {
+                title: `🎉 ${user.name} has found a ${attemptedProperty.name}!`,
+                description: `Base Chance: 1/${abbreviateNumber(String(attemptedProperty.chance))}\nCurrent Chance: 1/${abbreviateNumber(String(RNGLuck))}`,
+                timestamp: new Date().toISOString(),
+                color: propertyColor ?? 0x000000, // fallback to black if no color
+                footer: {
+                  text: "Rare Find!",
+                },
+              },
+            ]);
+          }
+        }
+      } catch (error) {
+        console.error("Failed to send webhook", error);
+      }
+
+      // Calculate new stats
+      const newValue =
+        (Number(sword.value) / (currentProperty?.valueMultiplier ?? 1)) *
+        attemptedProperty.valueMultiplier;
+
+      const newDamage =
+        ascending !== "material" &&
+        currentProperty &&
+        "damageMultiplier" in currentProperty
+          ? (Number(sword.damage) / currentProperty.damageMultiplier) *
+            (attemptedProperty.damageMultiplier ?? 1)
+          : Number(sword.damage);
+
+      const newExperience = Math.floor(newValue * 0.14);
+
+      const swordProperties = {
+        material: sword.material,
+        quality: sword.quality,
+        rarity: sword.rarity,
+        aura: sword.aura ?? undefined,
+        effect: sword.effect ?? undefined,
+        [ascending]: attemptedProperty.name,
+      };
+
+      const newEssence = getSacrificeRerolls(swordProperties);
+
+      // Update the sword
+      const updatedSword = await ctx.db.sword.update({
+        where: { id: sword.id },
+        data: {
+          [ascending]: attemptedProperty.name,
+          value: String(Math.round(newValue)),
+          damage: String(Math.round(newDamage)),
+          experience: String(newExperience),
+          essence: newEssence,
+        },
+      });
+
+      // Update cache
       userCache.set(ctx.session.user.id, {
         ...cachedUser,
         lastAscend: new Date(),
       });
 
-      throw new TRPCError({
-        code: "BAD_REQUEST",
-        message: `Failed to ascend to ${attemptedProperty.name} (1/${abbreviateNumber(String(RNGLuck))}) as the current ${input} better or same`,
-      });
+      return {
+        sword: updatedSword,
+        property: attemptedProperty,
+        luck: RNGLuck,
+      };
     }),
 
   rerollEnchants: protectedProcedure.mutation(async ({ ctx }) => {
@@ -453,6 +468,18 @@ export const swordRouter = createTRPCRouter({
       throw new TRPCError({
         code: "BAD_REQUEST",
         message: "You do not have any essence",
+      });
+    }
+
+    const now = Date.now();
+    const cachedUser = userCache.get(user.id);
+    const lastReroll = cachedUser?.lastReroll?.getTime() ?? 0;
+    const cooldown = user.vip ? 375 : 750;
+
+    if (lastReroll && now - lastReroll < cooldown) {
+      throw new TRPCError({
+        code: "TOO_MANY_REQUESTS",
+        message: `Please wait ${((cooldown - (now - lastReroll)) / 1000).toFixed(1)}s before rerolling enchants`,
       });
     }
 
@@ -544,6 +571,11 @@ export const swordRouter = createTRPCRouter({
         newMultipliers.luck,
       ),
     };
+
+    userCache.set(user.id, {
+      ...cachedUser,
+      lastReroll: new Date(),
+    });
 
     // Update the sword and user data
     const [updatedSword] = await ctx.db.$transaction([

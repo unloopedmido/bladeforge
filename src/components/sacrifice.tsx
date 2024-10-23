@@ -1,4 +1,4 @@
-import type { Sword, User } from "@prisma/client";
+import type { Sword } from "@prisma/client";
 import {
   Dialog,
   DialogContent,
@@ -14,6 +14,7 @@ import { toast } from "sonner";
 import { type Dispatch, type SetStateAction } from "react";
 import { LoaderCircle, Skull, Sparkles, Star } from "lucide-react";
 import { abbreviateNumber } from "@/lib/func";
+import type { ClientUserType } from "@/data/common";
 
 const SacrificeModal = ({
   setSword,
@@ -21,14 +22,21 @@ const SacrificeModal = ({
   sword,
 }: {
   setSword: Dispatch<SetStateAction<Sword | null>>;
-  setUser: Dispatch<SetStateAction<User | null>>;
+  setUser: Dispatch<SetStateAction<ClientUserType | null>>;
   sword: Sword | null;
 }) => {
   const { mutate: sacrificeSword, isPending: isSacrificing } =
     api.sword.sacrificeSword.useMutation({
       onSuccess: (data) => {
         setSword(null);
-        setUser(data);
+        setUser((prev) => {
+          if (!prev) return prev;
+          return {
+            ...prev,
+            essence: data.essence,
+            experience: data.experience,
+          };
+        });
         toast.success("Sword sacrificed successfully");
       },
       onError: (error) => {
@@ -65,7 +73,9 @@ const SacrificeModal = ({
               <Sparkles className="mr-3 h-6 w-6 text-blue-500" />
               <div>
                 <div className="font-semibold">Essence</div>
-                <div className="text-sm text-muted-foreground">+ {sword?.essence}</div>
+                <div className="text-sm text-muted-foreground">
+                  + {sword?.essence}
+                </div>
               </div>
             </div>
 

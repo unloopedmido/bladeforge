@@ -49,6 +49,20 @@ const Effects: Effect[] = [
     damageMultiplier: 1,
     color: "rgb(0,255,0)",
   },
+  {
+    name: "Vampiric",
+    chance: 0.05,
+    valueMultiplier: 1,
+    damageMultiplier: 50,
+    color: "rgb(255,0,255)",
+  },
+  {
+    name: "Legendary",
+    chance: 0.005,
+    valueMultiplier: 100,
+    damageMultiplier: 100,
+    color: "rgb(255,215,0)",
+  }
 ];
 
 export default Effects;

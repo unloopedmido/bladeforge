@@ -1,4 +1,9 @@
-import { useState, useCallback } from "react";
+import {
+  useState,
+  useCallback,
+  type Dispatch,
+  type SetStateAction,
+} from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "./ui/input";
 import {
@@ -11,18 +16,18 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { ArrowRight, Clover, CoinsIcon, LoaderCircle } from "lucide-react";
-import { type User as UserType } from "@prisma/client";
 import { abbreviateNumber } from "@/lib/func";
 import { api } from "@/utils/api";
 import { toast } from "sonner";
+import { type ClientUserType } from "@/data/common";
 
 // Constants
 const DIFFICULTY_MULTIPLIER = 1.18;
 const BASE_COST = 95;
 
 interface UpgradeLuckDialogProps {
-  user: UserType | null;
-  setUser: (user: UserType | null) => void;
+  user: ClientUserType | null;
+  setUser: Dispatch<SetStateAction<ClientUserType | null>>;
 }
 
 export default function UpgradeLuckDialog({
@@ -66,7 +71,14 @@ export default function UpgradeLuckDialog({
   const { mutate: upgradeLuck, isPending } = api.user.upgradeLuck.useMutation({
     onSuccess: (data) => {
       toast.success("Luck upgraded successfully");
-      setUser(data.user);
+      setUser((prev) => {
+        if (!prev) return prev;
+        return {
+          ...prev,
+          luck: data.user.luck,
+          money: data.user.money,
+        };
+      });
     },
     onError: (error) => {
       toast.error(error.message);
@@ -186,30 +198,5 @@ export default function UpgradeLuckDialog({
         </DialogFooter>
       </DialogContent>
     </Dialog>
-  );
-}
-
-// Helper component for status displays
-function StatusDisplay({
-  label,
-  value,
-  icon,
-  colorClass,
-}: {
-  label: string;
-  value: number;
-  icon: React.ReactNode;
-  colorClass: string;
-}) {
-  return (
-    <div className="flex flex-col">
-      <h1 className="text-lg font-semibold">{label}</h1>
-      <p
-        className={`flex items-center gap-x-1 text-sm font-light ${colorClass}`}
-      >
-        {icon}
-        <strong>{abbreviateNumber(String(value))}</strong>
-      </p>
-    </div>
   );
 }

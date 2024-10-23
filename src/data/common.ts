@@ -4,13 +4,38 @@ import Qualities from "./qualities";
 import Rarities from "./rarities";
 import Auras from "./auras";
 import Effects from "./effects";
+import type { Sword } from "@prisma/client";
 
 export type Property = {
   name: string;
   chance: number;
   valueMultiplier: number;
   damageMultiplier?: number;
+  color?: string | string[];
 };
+
+export interface UserType {
+  luck: bigint;
+  vip: boolean;
+  swordId: string | null;
+  experience: string;
+  swords: {
+    id: string;
+    luck: number;
+  }[];
+}
+
+export interface ClientUserType {
+  name: string | null;
+  vip: boolean;
+  id: string;
+  luck: bigint;
+  essence: number;
+  experience: string;
+  swordId: string | null;
+  money: string;
+  swords: Sword[];
+}
 
 export function luckFromLevel(level: number): number {
   const baseLuckFactor = 1.02; // Start with a smaller base to slow growth
@@ -103,6 +128,12 @@ export function getSwordAura(aura: string): string {
       return baseURL + `snow_xagxhc`;
     case "light":
       return baseURL + `light_qeca2n`;
+    case "vortex":
+      return baseURL + `vortex_quhbi5`;
+    case "aegis":
+      return baseURL + `aegis_wlvtiz`;
+    case "godsent":
+      return baseURL + `godsent_lwho5o`;
     default:
       return baseURL + `bastard_mcgatj`;
   }
@@ -115,22 +146,28 @@ export function getSacrificeRerolls(sword: {
   aura?: string;
   effect?: string;
 }): number {
-  const material = Materials.find((m) => m.name === sword.material);
-  const quality = Qualities.find((q) => q.name === sword.quality);
-  const rarity = Rarities.find((r) => r.name === sword.rarity);
-  const aura = Auras.find((a) => a.name === sword.aura);
-  const effect = Effects.find((e) => e.name === sword.effect);
+  const sortedMaterials = [...Materials].sort((a, b) => a.chance - b.chance);
+  const sortedQualities = [...Qualities].sort((a, b) => a.chance - b.chance);
+  const sortedRarities = [...Rarities].sort((a, b) => a.chance - b.chance);
+  const sortedAuras = [...Auras].sort((a, b) => b.chance - a.chance);
+  const sortedEffects = [...Effects].sort((a, b) => b.chance - a.chance);
+
+  const material = sortedMaterials.find((m) => m.name === sword.material);
+  const quality = sortedQualities.find((q) => q.name === sword.quality);
+  const rarity = sortedRarities.find((r) => r.name === sword.rarity);
+  const aura = sortedAuras.find((a) => a.name === sword.aura);
+  const effect = sortedEffects.find((e) => e.name === sword.effect);
 
   if (!material || !quality || !rarity) return 0;
 
   const essence =
     1 +
     Math.floor(
-      (Materials.indexOf(material) * 0.5 +
-        Qualities.indexOf(quality) * 0.5 +
-        Rarities.indexOf(rarity) * 0.5) *
-        (aura ? Auras.indexOf(aura) + 1 : 1) *
-        (effect ? Effects.indexOf(effect) + 1 : 1),
+      (sortedMaterials.indexOf(material) * 0.5 +
+        sortedQualities.indexOf(quality) * 0.5 +
+        sortedRarities.indexOf(rarity) * 0.5) *
+        (aura ? sortedAuras.indexOf(aura) + 1 : 1) *
+        (effect ? sortedEffects.indexOf(effect) + 1 : 1),
     );
 
   return essence;

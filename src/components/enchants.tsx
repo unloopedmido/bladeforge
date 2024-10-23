@@ -9,10 +9,10 @@ import {
   DialogFooter,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import type { Sword, User } from "@prisma/client";
+import type { Sword } from "@prisma/client";
 import { api } from "@/utils/api";
 import { toast } from "sonner";
-import { getEnchantData } from "@/data/common";
+import { type ClientUserType, getEnchantData } from "@/data/common";
 import { LoaderCircle, Redo } from "lucide-react";
 import { rgba } from "@/lib/func";
 
@@ -77,7 +77,7 @@ const RerollModal = ({
   essenceLeft,
 }: {
   setSword: Dispatch<SetStateAction<Sword | null>>;
-  setUser: Dispatch<SetStateAction<User | null>>;
+  setUser: Dispatch<SetStateAction<ClientUserType | null>>;
   sword: Sword | null;
   essenceLeft: number;
 }) => {
@@ -85,7 +85,7 @@ const RerollModal = ({
     api.sword.rerollEnchants.useMutation({
       onSuccess: (data) => {
         setSword(data);
-        setUser((prevUser: User | null) => {
+        setUser((prevUser: ClientUserType | null) => {
           if (!prevUser) return prevUser;
           return {
             ...prevUser,

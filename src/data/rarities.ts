@@ -6,7 +6,7 @@ interface Rarity extends Property {
   chance: number;
   valueMultiplier: number;
   damageMultiplier: number;
-};
+}
 
 const Rarities: Rarity[] = [
   { name: "Common", color: "rgb(128,128,128)" },
@@ -29,6 +29,10 @@ const Rarities: Rarity[] = [
   {
     name: "Fabled",
     color: ["rgb(75,0,130)", "rgb(148,0,211)"],
+  },
+  {
+    name: "Forsaken",
+    color: ["rgb(75,0,0)", "rgb(139,0,139)"], // Double
   },
   {
     name: "Shadow",
@@ -54,6 +58,10 @@ const Rarities: Rarity[] = [
   {
     name: "Spectral",
     color: ["rgb(153,50,204)", "rgb(102,205,170)"],
+  },
+  {
+    name: "Temporal",
+    color: ["rgb(135,206,235)", "rgb(70,130,180)", "rgb(240,248,255)"], // Triple
   },
   {
     name: "Mystic",
@@ -92,6 +100,10 @@ const Rarities: Rarity[] = [
     color: ["rgb(0,255,0)", "rgb(154,205,50)", "rgb(0,128,0)"], // Triple
   },
   {
+    name: "Chimeric",
+    color: ["rgb(0,191,255)", "rgb(148,0,211)"], // Double
+  },
+  {
     name: "Noble",
     color: ["rgb(240,230,140)", "rgb(255,239,0)"],
   },
@@ -102,6 +114,10 @@ const Rarities: Rarity[] = [
   {
     name: "Seraphic",
     color: ["rgb(255,192,203)", "rgb(255,105,180)"],
+  },
+  {
+    name: "Veiled",
+    color: ["rgb(102,102,102)", "rgb(128,0,128)"], // Double
   },
   {
     name: "Abyssal",
@@ -117,7 +133,7 @@ const Rarities: Rarity[] = [
     color: ["rgb(128,0,128)", "rgb(75,0,130)", "rgb(255,105,180)"], // Triple
   },
   {
-    name: "Tempestuous",
+    name: "Tempest",
     color: ["rgb(0,0,255)", "rgb(135,206,250)", "rgb(70,130,180)"], // Triple
   },
   {
@@ -139,6 +155,18 @@ const Rarities: Rarity[] = [
   {
     name: "Vengeful",
     color: ["rgb(255,0,255)", "rgb(128,0,0)", "rgb(0,0,0)"], // Triple
+  },
+  {
+    name: "Eclipse",
+    color: ["rgb(75,0,130)", "rgb(0,0,0)", "rgb(169,169,169)"], // Triple
+  },
+  {
+    name: "Nebula",
+    color: ["rgb(0,0,128)", "rgb(75,0,130)"], // Double
+  },
+  {
+    name: "Zephyr",
+    color: ["rgb(173,216,230)", "rgb(135,206,250)"], // Double
   },
 ].map((rarity, index) => ({
   name: rarity.name,

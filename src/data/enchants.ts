@@ -284,8 +284,7 @@ const Enchants: Enchant[] = [
     damageMultiplier: 8,
     luckMultiplier: 0,
     experienceMultiplier: 0,
-    tier: 5
-
+    tier: 5,
   },
   // Tier 6 (one for all)
   {
@@ -296,7 +295,47 @@ const Enchants: Enchant[] = [
     damageMultiplier: 12,
     luckMultiplier: 12,
     experienceMultiplier: 12,
-    tier: 6
+    tier: 6,
+  },
+  {
+    name: "Ascendancy", // New Enchant 1
+    color: ["rgb(255,0,255)", "rgb(0,128,255)"],
+    chance: 0.1,
+    valueMultiplier: 15,
+    damageMultiplier: 10,
+    luckMultiplier: 5,
+    experienceMultiplier: 8,
+    tier: 6,
+  },
+  {
+    name: "Elysium", // New Enchant 2
+    color: ["rgb(0,255,127)", "rgb(135,206,250)"],
+    chance: 0.1,
+    valueMultiplier: 8,
+    damageMultiplier: 15,
+    luckMultiplier: 10,
+    experienceMultiplier: 5,
+    tier: 6,
+  },
+  {
+    name: "Nirvana", // New Enchant 3
+    color: ["rgb(255,165,0)", "rgb(255,192,203)"],
+    chance: 0.1,
+    valueMultiplier: 10,
+    damageMultiplier: 5,
+    luckMultiplier: 15,
+    experienceMultiplier: 8,
+    tier: 6,
+  },
+  {
+    name: "Empyrean", // New Enchant 4
+    color: ["rgb(255,215,0)", "rgb(240,248,255)"],
+    chance: 0.1,
+    valueMultiplier: 5,
+    damageMultiplier: 8,
+    luckMultiplier: 10,
+    experienceMultiplier: 15,
+    tier: 6,
   },
 ];
 

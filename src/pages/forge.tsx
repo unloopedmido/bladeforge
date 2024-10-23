@@ -1,6 +1,6 @@
 import Layout from "@/components/layout";
 import { api } from "@/utils/api";
-import { type Sword as SwordType, type User as UserType } from "@prisma/client";
+import { type Sword as SwordType } from "@prisma/client";
 import { useEffect, useState } from "react";
 import UserStats from "@/components/userstats";
 import SwordDisplay from "@/components/sword";
@@ -8,10 +8,11 @@ import ActionButtons from "@/components/buttons";
 import FakeSword from "@/components/fakesword";
 import { Clover, CoinsIcon, Star } from "lucide-react";
 import { abbreviateNumber } from "@/lib/func";
+import type { ClientUserType } from "@/data/common";
 
 export default function Forge() {
   const [sword, setSword] = useState<SwordType | null>(null);
-  const [user, setUser] = useState<UserType | null>(null);
+  const [user, setUser] = useState<ClientUserType | null>(null);
 
   const { data: userData, isLoading: isUserLoading } = api.user.user.useQuery(
     undefined,
@@ -21,18 +22,12 @@ export default function Forge() {
     },
   );
 
-  const { data: globalBoosts, isLoading: isGlobalBoostsLoading } =
-    api.user.getGlobalBoosts.useQuery(undefined, {
-      refetchOnWindowFocus: false,
-      refetchOnMount: true,
-    });
-
   useEffect(() => {
     setSword(userData?.swords.find((s) => s.id === userData.swordId) ?? null);
     setUser(userData ?? null);
   }, [userData]);
 
-  if (isUserLoading || isGlobalBoostsLoading) {
+  if (isUserLoading) {
     return <Layout isLoading />;
   }
 

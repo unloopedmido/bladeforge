@@ -140,6 +140,7 @@ export const userRouter = createTRPCRouter({
 
     return user;
   }),
+
   upgradeLuck: protectedProcedure
     .input(z.number().int().positive())
     .mutation(async ({ ctx, input: luckIncrement }) => {
