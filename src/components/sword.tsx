@@ -22,7 +22,7 @@ interface SwordProps {
 function Content({ sword, username }: SwordProps) {
   return (
     <div
-      className="relative flex h-[350px] w-[350px] flex-col p-3"
+      className="relative flex h-[300px] w-[300px] flex-col p-3 sm:h-[350px] sm:w-[350px]"
       style={
         sword.effect
           ? {
@@ -106,6 +106,7 @@ function Content({ sword, username }: SwordProps) {
               textShadow: `2px 2px 4px ${sword.effect}`,
               zIndex: 2, // Ensure text is above the gradient
               position: "relative", // Establish a new stacking context for text
+              color: Effects.find((e) => e.name === sword.effect)?.color,
             }}
             className={cn("text-2xl font-bold", CoolFont.className)}
           >
@@ -194,7 +195,7 @@ export default function Sword({ sword, username }: SwordProps) {
     <>
       {(Rarities.find((r) => r.name === sword.rarity)?.chance ?? 0) >= 336 ? (
         <ShineBorder
-        className="w-[350px] h-[350px]"
+          className="h-[300px] w-[300px] sm:h-[350px] sm:w-[350px]"
           borderWidth={5}
           duration={14}
           color={rgbToAlpha(

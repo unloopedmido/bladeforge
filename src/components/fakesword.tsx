@@ -6,7 +6,7 @@ const CoolFont = Fredoka({
 
 export default function FakeSword() {
   return (
-    <div className="group relative h-[350px] w-[350px] overflow-hidden rounded-xl border border-purple-500/20 bg-black/40 transition-all hover:bg-black/50">
+    <div className="group relative sm:h-[350px] sm:w-[350px] h-[300px] w-[300px] overflow-hidden rounded-xl border border-purple-500/20 bg-black/40 transition-all hover:bg-black/50">
       {/* Animated corner accents */}
       <div className="absolute left-0 top-0 h-16 w-16 border-l-2 border-t-2 border-purple-400/30" />
       <div className="absolute right-0 bottom-0 h-16 w-16 border-r-2 border-b-2 border-purple-400/30" />
