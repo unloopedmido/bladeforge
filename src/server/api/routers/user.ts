@@ -14,17 +14,32 @@ const userCache = new Map<
   }
 >();
 
+setInterval(() => {
+  const now = Date.now();
+  for (const [key, value] of userCache.entries()) {
+    if (
+      value.lastLuckUpgrade &&
+      now - value.lastLuckUpgrade.getTime() > 3600000
+    ) {
+      userCache.delete(key);
+    }
+  }
+}, 3600000);
+
 export const userRouter = createTRPCRouter({
   getAllUsers: protectedProcedure.query(async ({ ctx }) => {
     try {
       const users = await ctx.db.user.findMany({
-        orderBy: [{ experience: "desc" }, { luck: "desc" }, { money: "desc" }],
-        include: {
-          swords: true,
+        select: {
+          id: true,
+          name: true,
+          image: true,
+          experience: true,
         },
         where: {
-          luck: { not: BigInt(1) || 1 },
+          luck: { gt: 1 },
         },
+        orderBy: [{ experience: "desc" }, { luck: "desc" }, { money: "desc" }],
       });
 
       return users;
@@ -41,33 +56,34 @@ export const userRouter = createTRPCRouter({
 
   getUsers: protectedProcedure.query(async ({ ctx }) => {
     try {
-      // Fetch more users than needed to ensure we have enough after sorting
       const users = await ctx.db.user.findMany({
-        include: {
-          swords: true,
+        select: {
+          id: true,
+          name: true,
+          luck: true,
+          money: true,
+          experience: true,
+          image: true,
+          swordsGenerated: true,
+          createdAt: true,
+          vip: true,
         },
         where: {
-          luck: { not: BigInt(1) },
+          luck: { gt: 1 },
         },
-        orderBy: [{ luck: "desc" }, { money: "desc" }],
-        take: 20, // Fetch top 100 by luck and money
+        orderBy: [{ experience: "desc" }, { luck: "desc" }, { money: "desc" }],
       });
 
-      // Custom sorting function
       const sortedUsers = users.sort((a, b) => {
-        // Compare experience strings as big numbers
         const expDiff = BigInt(b.experience) - BigInt(a.experience);
         if (expDiff !== BigInt(0)) return expDiff > BigInt(0) ? 1 : -1;
 
-        // If experience is equal, compare luck
         const luckDiff = b.luck - a.luck;
         if (luckDiff !== BigInt(0)) return Number(luckDiff);
 
-        // If luck is also equal, compare money
         return Number(b.money) - Number(a.money);
       });
 
-      // Take the top 10 after sorting
       return sortedUsers.slice(0, 10);
     } catch (error) {
       if (error instanceof TRPCError) throw error;
@@ -83,7 +99,15 @@ export const userRouter = createTRPCRouter({
   userTotalLuck: protectedProcedure.query(async ({ ctx }) => {
     const user = await ctx.db.user.findUnique({
       where: { id: ctx.session.user.id },
-      include: { swords: true },
+      select: {
+        luck: true,
+        swordId: true,
+        experience: true,
+        vip: true,
+        swords: {
+          select: { luck: true, id: true },
+        },
+      },
     });
 
     if (!user)
@@ -101,7 +125,18 @@ export const userRouter = createTRPCRouter({
       // Check if user is authenticated
       const user = await ctx.db.user.findUnique({
         where: { id: input },
-        include: { swords: true },
+        select: {
+          experience: true,
+          image: true,
+          name: true,
+          id: true,
+          money: true,
+          luck: true,
+          swordsGenerated: true,
+          swords: true,
+          vip: true,
+          swordId: true,
+        },
       });
 
       if (!user)

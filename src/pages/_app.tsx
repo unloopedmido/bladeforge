@@ -8,6 +8,7 @@ import { ThemeProvider } from "@/components/theme-provider";
 import { Toaster } from "@/components/ui/sonner";
 import Navbar from "@/components/navbar";
 import Head from "next/head";
+import Footer from "@/components/footer";
 
 const MontserratFont = Montserrat({
   subsets: ["latin"],
@@ -70,6 +71,7 @@ const MyApp: AppType<{ session: Session | null }> = ({
           <div className="flex h-full min-h-screen flex-col">
             <Navbar />
             <Component {...pageProps} />
+            <Footer />
           </div>
           <Toaster richColors />
         </div>

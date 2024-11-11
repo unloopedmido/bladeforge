@@ -15,7 +15,7 @@ import {
 } from "@/server/util";
 import Enchants, { type Enchant } from "@/data/enchants";
 import type { db } from "@/server/db";
-import { getSacrificeRerolls } from "@/data/common";
+import { calculateSacrificeRerolls } from "@/data/common";
 
 const userCache = new Map<
   string,
@@ -27,6 +27,20 @@ const userCache = new Map<
     lastReroll?: Date;
   }
 >();
+
+setInterval(
+  () => {
+    const now = Date.now();
+    for (const [userId, user] of userCache.entries()) {
+      if (user.lastAscend) {
+        if (now - user.lastAscend.getTime() >= 1000 * 60 * 60) {
+          userCache.delete(userId);
+        }
+      }
+    }
+  },
+  1000 * 60 * 60,
+); // 1 hour
 
 const userWithSword = async (ctx: {
   db: typeof db;
@@ -100,7 +114,7 @@ export const swordRouter = createTRPCRouter({
     }
 
     if (sword.essence === 0) {
-      sword.essence = getSacrificeRerolls({
+      sword.essence = calculateSacrificeRerolls({
         material: sword.material,
         quality: sword.quality,
         rarity: sword.rarity,
@@ -427,7 +441,7 @@ export const swordRouter = createTRPCRouter({
         [ascending]: attemptedProperty.name,
       };
 
-      const newEssence = getSacrificeRerolls(swordProperties);
+      const newEssence = calculateSacrificeRerolls(swordProperties);
 
       // Update the sword
       const updatedSword = await ctx.db.sword.update({
@@ -497,43 +511,46 @@ export const swordRouter = createTRPCRouter({
       });
     }
 
-    // Function to calculate multipliers
+    // Function to calculate multipliers - Fixed to handle missing multipliers correctly
     const calculateMultiplier = (
       enchants: Enchant[],
       property: keyof Enchant,
-    ) => {
-      return (
-        enchants.reduce(
-          (acc, enchant) => acc + (Number(enchant[property]) || 0),
-          0,
-        ) || 1
-      ); // Prevent division by zero
+    ): number => {
+      const totalIncrease = enchants.reduce(
+        (acc, enchant) => acc + ((Number(enchant[property]) || 1) - 1),
+        0,
+      );
+      return 1 + totalIncrease;
     };
 
-    // Calculate old multipliers
-    const oldMultipliers = {
+    // Calculate base stats (removing current enchant effects)
+    const currentMultipliers = {
       value: calculateMultiplier(enchants, "valueMultiplier"),
       damage: calculateMultiplier(enchants, "damageMultiplier"),
       experience: calculateMultiplier(enchants, "experienceMultiplier"),
       luck: calculateMultiplier(enchants, "luckMultiplier"),
     };
 
+    const baseStats = {
+      value: Math.round(Number(sword.value) / currentMultipliers.value),
+      damage: Math.round(Number(sword.damage) / currentMultipliers.damage),
+      experience: Math.round(
+        Number(sword.experience) / currentMultipliers.experience,
+      ),
+      luck: sword.luck / currentMultipliers.luck,
+    };
+
     const newEnchants: Enchant[] = [];
-    const existingEnchantNames = new Set(sword.enchants); // To track existing enchant names
+    const usedEnchantNames = new Set<string>();
 
     while (newEnchants.length < enchantsCount) {
       const newEnchant = getRandomEnchant();
-
-      // Check for duplicates
-      if (
-        !existingEnchantNames.has(newEnchant.name) &&
-        !newEnchants.some((e) => e.name === newEnchant.name)
-      ) {
+      if (!usedEnchantNames.has(newEnchant.name)) {
         newEnchants.push(newEnchant);
+        usedEnchantNames.add(newEnchant.name);
       }
     }
 
-    // Calculate new multipliers for the new enchants
     const newMultipliers = {
       value: calculateMultiplier(newEnchants, "valueMultiplier"),
       damage: calculateMultiplier(newEnchants, "damageMultiplier"),
@@ -541,35 +558,18 @@ export const swordRouter = createTRPCRouter({
       luck: calculateMultiplier(newEnchants, "luckMultiplier"),
     };
 
-    // Function to calculate new stats
-    const calculateNewStat = (
-      oldValue: string,
-      oldMultiplier: number,
-      newMultiplier: number,
-    ) => Math.round((Number(oldValue) / oldMultiplier) * newMultiplier);
+    const finalStats = {
+      value: Math.round(baseStats.value * newMultipliers.value),
+      damage: Math.round(baseStats.damage * newMultipliers.damage),
+      experience: Math.round(baseStats.experience * newMultipliers.experience),
+      luck: baseStats.luck * newMultipliers.luck,
+    };
 
-    // Updated stats
-    const updatedStats = {
-      value: calculateNewStat(
-        sword.value,
-        oldMultipliers.value,
-        newMultipliers.value,
-      ),
-      damage: calculateNewStat(
-        sword.damage,
-        oldMultipliers.damage,
-        newMultipliers.damage,
-      ),
-      experience: calculateNewStat(
-        sword.experience,
-        oldMultipliers.experience,
-        newMultipliers.experience,
-      ),
-      luck: calculateNewStat(
-        String(sword.luck),
-        oldMultipliers.luck,
-        newMultipliers.luck,
-      ),
+    const minimumStats = {
+      value: Math.max(1, finalStats.value),
+      damage: Math.max(1, finalStats.damage),
+      experience: Math.max(1, finalStats.experience),
+      luck: Math.max(0, finalStats.luck), // Luck can be 0
     };
 
     userCache.set(user.id, {
@@ -577,16 +577,15 @@ export const swordRouter = createTRPCRouter({
       lastReroll: new Date(),
     });
 
-    // Update the sword and user data
     const [updatedSword] = await ctx.db.$transaction([
       ctx.db.sword.update({
         where: { id: sword.id },
         data: {
           enchants: newEnchants.map((enchant) => enchant.name),
-          value: String(updatedStats.value),
-          damage: String(updatedStats.damage),
-          experience: String(updatedStats.experience),
-          luck: updatedStats.luck,
+          value: String(minimumStats.value),
+          damage: String(minimumStats.damage),
+          experience: String(minimumStats.experience),
+          luck: minimumStats.luck,
         },
       }),
       ctx.db.user.update({
@@ -621,7 +620,7 @@ export const swordRouter = createTRPCRouter({
       });
     }
 
-    const essence = getSacrificeRerolls({
+    const essence = calculateSacrificeRerolls({
       material: sword.material,
       quality: sword.quality,
       rarity: sword.rarity,

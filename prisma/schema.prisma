@@ -58,7 +58,7 @@ model Sword {
   effect     String?
   damage     String
   value      String
-  essence    Int @default(0)
+  essence    Int      @default(0)
   experience String   @default("100")
   owner      User     @relation(fields: [ownerId], references: [id], onDelete: Cascade)
 
@@ -69,7 +69,7 @@ model User {
   id              String    @id @default(cuid())
   name            String?
   image           String?
-  luck            BigInt    @default(1)
+  luck            Float    @default(1)
   vip             Boolean   @default(false)
   swordId         String?
   createdAt       DateTime  @default(now())

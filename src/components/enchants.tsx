@@ -9,64 +9,91 @@ import {
   DialogFooter,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { Card } from "@/components/ui/card";
 import type { Sword } from "@prisma/client";
 import { api } from "@/utils/api";
 import { toast } from "sonner";
 import { type ClientUserType, getEnchantData } from "@/data/common";
-import { LoaderCircle, Redo } from "lucide-react";
+import { Loader, Redo, Sparkles } from "lucide-react";
 import { rgba } from "@/lib/func";
+import { ActionButton } from "@/pages/forge";
 
 const EnchantDisplay = ({ enchantName }: { enchantName: string }) => {
   const enchant = getEnchantData(enchantName);
 
+  const getStatIcon = (stat: string) => {
+    switch (stat) {
+      case "Damage":
+        return "⚔️";
+      case "Luck":
+        return "🍀";
+      case "Value":
+        return "💰";
+      case "XP":
+        return "⭐";
+      default:
+        return "";
+    }
+  };
+
   return (
-    <div
-      className="flex flex-col items-center justify-center rounded-lg p-4 shadow-2xl"
-      style={{
-        background: rgba(enchant.rarity.color, 0.3),
-      }}
-    >
-      {/* Enchant Rarity */}
-      <p
-        className="text-sm font-bold uppercase tracking-wide"
+    <Card className="group relative overflow-hidden transition-all duration-300 hover:scale-105">
+      <div
+        className="absolute inset-0 opacity-75 transition-opacity duration-300 group-hover:opacity-90"
         style={{
-          color: rgba(enchant.rarity.color, 1),
+          background: `linear-gradient(135deg, ${rgba(enchant.rarity.color, 0.2)}, ${rgba(enchant.rarity.color, 0.4)})`,
         }}
-      >
-        {enchant.rarity.name}
-      </p>
+      />
 
-      {/* Enchant Name */}
-      <p className="mb-2 text-lg font-semibold">{enchant.name}</p>
+      <div className="relative flex flex-col items-center p-4">
+        <div
+          className="mb-2 rounded-full px-3 py-1 text-xs font-bold uppercase tracking-wider"
+          style={{
+            backgroundColor: rgba(enchant.rarity.color, 0.2),
+            color: rgba(enchant.rarity.color, 1),
+          }}
+        >
+          {enchant.rarity.name}
+        </div>
 
-      {/* Enchant Properties */}
-      <div className="flex flex-col space-y-1 text-center text-sm">
-        {enchant.damageMultiplier > 0 && (
-          <p className="font-medium">
-            {enchant.damageMultiplier}x{" "}
-            <span className="text-red-500">Damage</span>
-          </p>
-        )}
-        {enchant.luckMultiplier > 0 && (
-          <p className="font-medium">
-            {enchant.luckMultiplier}x{" "}
-            <span className="text-green-500">Luck</span>
-          </p>
-        )}
-        {enchant.valueMultiplier > 0 && (
-          <p className="font-medium">
-            {enchant.valueMultiplier}x{" "}
-            <span className="text-yellow-500">Value</span>
-          </p>
-        )}
-        {enchant.experienceMultiplier > 0 && (
-          <p className="font-medium">
-            {enchant.experienceMultiplier}x{" "}
-            <span className="text-purple-500">XP</span>
-          </p>
-        )}
+        <h3 className="mb-3 text-lg font-bold">{enchant.name}</h3>
+
+        <div className="flex flex-col space-y-2 text-sm">
+          {enchant.damageMultiplier > 0 && (
+            <div className="flex items-center space-x-2 font-medium">
+              <span>{getStatIcon("Damage")}</span>
+              <span className="text-red-500">
+                +{enchant.damageMultiplier}% Damage
+              </span>
+            </div>
+          )}
+          {enchant.luckMultiplier > 0 && (
+            <div className="flex items-center space-x-2 font-medium">
+              <span>{getStatIcon("Luck")}</span>
+              <span className="text-green-500">
+                +{enchant.luckMultiplier}% Luck
+              </span>
+            </div>
+          )}
+          {enchant.valueMultiplier > 0 && (
+            <div className="flex items-center space-x-2 font-medium">
+              <span>{getStatIcon("Value")}</span>
+              <span className="text-yellow-500">
+                +{enchant.valueMultiplier}% Value
+              </span>
+            </div>
+          )}
+          {enchant.experienceMultiplier > 0 && (
+            <div className="flex items-center space-x-2 font-medium">
+              <span>{getStatIcon("XP")}</span>
+              <span className="text-purple-500">
+                +{enchant.experienceMultiplier}% XP
+              </span>
+            </div>
+          )}
+        </div>
       </div>
-    </div>
+    </Card>
   );
 };
 
@@ -93,7 +120,7 @@ const RerollModal = ({
             sacrificesResetAt: new Date(Date.now() + 60 * 60 * 1000),
           };
         });
-        toast.success("Enchants rerolled successfully");
+        toast.success("✨ Enchants rerolled successfully!");
       },
       onError: (error) => {
         toast.error(error.message);
@@ -105,46 +132,63 @@ const RerollModal = ({
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button variant="secondary" disabled={!sword || essenceLeft === 0 || sword.enchants.length === 0}>
-          <Redo className="mr-2 h-4 w-4" />
-          Reroll Enchants ({essenceLeft})
-        </Button>
+        <ActionButton
+          icon={Redo}
+          label="Reroll Enchants"
+          variant="outline"
+          disabled={!sword}
+          loading={isRerollingEnchants}
+        />
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[425px]">
+
+      <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-x-2 text-2xl">
-            <Redo className="h-6 w-6 text-primary" /> Reroll Enchants
+          <DialogTitle className="flex items-center gap-x-3 text-2xl">
+            <Sparkles className="h-6 w-6" />
+            Reroll Enchants
           </DialogTitle>
           <DialogDescription className="text-base">
-            Reroll the enchants on your sword. You have{" "}
-            <strong>{essenceLeft}</strong> essence left.
+            Transform your sword&apos;s enchantments with magical essence. You
+            have{" "}
+            <span className="font-bold text-purple-500">{essenceLeft}</span>{" "}
+            essence remaining.
           </DialogDescription>
         </DialogHeader>
-        <div className="my-4">
-          <h2 className="mb-3 text-lg font-bold">Current Enchants</h2>
-          <div className="grid grid-cols-2 gap-3">
+
+        <div className="my-6">
+          <h2 className="mb-4 text-lg font-bold">Current Enchantments</h2>
+          <div className="grid grid-cols-2 gap-4">
             {sword?.enchants.map((enchant, index) => (
               <EnchantDisplay key={index} enchantName={enchant} />
             ))}
           </div>
         </div>
+
         <DialogFooter>
-          <Button
-            className="w-full"
-            onClick={handleRerollEnchants}
-            disabled={essenceLeft === 0 || isRerollingEnchants}
-          >
-            {isRerollingEnchants ? (
-              <div className="flex items-center justify-center">
-                <LoaderCircle className="mr-2 h-4 w-4 animate-spin" />
-                Rerolling...
-              </div>
-            ) : (
-              <>
-                Reroll Enchants
-              </>
-            )}
-          </Button>
+          {isRerollingEnchants ? (
+            <Button
+              className="w-full"
+              disabled={essenceLeft === 0 || isRerollingEnchants}
+              loading
+            >
+              {
+                [
+                  "Channelling Magic...",
+                  "Drawing Runes...",
+                  "Casting Spells...",
+                ][Math.floor(Math.random() * 3)]
+              }
+            </Button>
+          ) : (
+            <Button
+              className="w-full"
+              onClick={handleRerollEnchants}
+              disabled={essenceLeft === 0 || isRerollingEnchants}
+              icon={Sparkles}
+            >
+              <span>Reroll Enchantments</span>
+            </Button>
+          )}
         </DialogFooter>
       </DialogContent>
     </Dialog>

@@ -3,15 +3,7 @@ import Layout from "@/components/layout";
 import { api } from "@/utils/api";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { 
-  Sword, 
-  Coins, 
-  Zap, 
-  Shield, 
-  Clover, 
-  Crown,
-  Search,
-} from "lucide-react";
+import { Sword, Coins, Zap, Shield, Clover, Crown, Search } from "lucide-react";
 import { getForgingTitle } from "@/data/common";
 import {
   abbreviateNumber,
@@ -53,7 +45,8 @@ export default function Profile() {
   const currentExperience = Number(user?.experience ?? 0);
   const currentLevel = getLevelFromExperience(currentExperience);
   const experienceRequired = getExperienceForNextLevel(currentLevel);
-  const experiencePercentage = ((currentExperience % experienceRequired) / experienceRequired) * 100;
+  const experiencePercentage =
+    ((currentExperience % experienceRequired) / experienceRequired) * 100;
   const experienceForCurrentLevel = currentExperience % experienceRequired;
 
   const filteredUsers = allUsers?.filter((otherUser) =>
@@ -69,10 +62,13 @@ export default function Profile() {
             {/* Profile Header */}
             <div className="flex flex-col items-center gap-4 sm:flex-row sm:items-start">
               <Avatar className="h-24 w-24 border-2 border-purple-500/20">
-                <AvatarImage src={user?.image ?? ""} alt={user?.name ?? "User"} />
+                <AvatarImage
+                  src={user?.image ?? ""}
+                  alt={user?.name ?? "User"}
+                />
                 <AvatarFallback>{user?.name?.[0] ?? "U"}</AvatarFallback>
               </Avatar>
-              
+
               <div className="flex-1 text-center sm:text-left">
                 <div className="flex flex-wrap items-center justify-center gap-2 sm:justify-start">
                   <h1 className="text-3xl font-bold">{user?.name}</h1>
@@ -81,24 +77,20 @@ export default function Profile() {
                       VIP
                     </span>
                   )}
-                  {user?.booster && (
-                    <span className="rounded bg-gradient-to-r from-purple-400 to-purple-600 px-2 py-0.5 text-xs font-bold text-black">
-                      BOOSTER
-                    </span>
-                  )}
                 </div>
                 <p className="mt-1 text-sm text-muted-foreground">{user?.id}</p>
                 <p className="mt-2 text-lg font-semibold text-purple-500">
                   {getForgingTitle(currentLevel)}
                 </p>
               </div>
-              
+
               {/* Level Display */}
               <div className="flex flex-col items-center rounded-lg border bg-background/50 p-4 text-center">
                 <Crown className="mb-1 h-5 w-5 text-yellow-500" />
                 <span className="text-2xl font-bold">Level {currentLevel}</span>
                 <span className="text-sm text-muted-foreground">
-                  {abbreviateNumber(String(experienceForCurrentLevel))} / {abbreviateNumber(String(experienceRequired))} XP
+                  {abbreviateNumber(String(experienceForCurrentLevel))} /{" "}
+                  {abbreviateNumber(String(experienceRequired))} XP
                 </span>
               </div>
             </div>
@@ -219,7 +211,11 @@ export default function Profile() {
             </CardHeader>
             <CardContent>
               <SwordDisplay
-                sword={user.swords.sort((a, b) => Number(b.value) - Number(a.value))[0]!}
+                sword={
+                  user.swords.sort(
+                    (a, b) => Number(b.value) - Number(a.value),
+                  )[0]!
+                }
                 username={user.name!}
               />
             </CardContent>
@@ -255,7 +251,10 @@ export default function Profile() {
                         <div>
                           <p className="font-medium">{otherUser.name}</p>
                           <p className="text-sm text-muted-foreground">
-                            Level {getLevelFromExperience(Number(otherUser.experience))}
+                            Level{" "}
+                            {getLevelFromExperience(
+                              Number(otherUser.experience),
+                            )}
                           </p>
                         </div>
                       </div>

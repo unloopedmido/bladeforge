@@ -15,6 +15,7 @@ import { type Dispatch, type SetStateAction } from "react";
 import { LoaderCircle, Skull, Sparkles, Star } from "lucide-react";
 import { abbreviateNumber } from "@/lib/func";
 import type { ClientUserType } from "@/data/common";
+import { ActionButton } from "@/pages/forge";
 
 const SacrificeModal = ({
   setSword,
@@ -49,10 +50,13 @@ const SacrificeModal = ({
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button variant="secondary" disabled={!sword || isSacrificing}>
-          <Skull className="mr-2 h-4 w-4" />
-          Sacrifice Sword
-        </Button>
+        <ActionButton
+          icon={Skull}
+          label="Sacrifice Sword"
+          variant="outline"
+          disabled={!sword}
+          loading={isSacrificing}
+        />
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>

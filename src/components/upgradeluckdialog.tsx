@@ -20,6 +20,7 @@ import { abbreviateNumber } from "@/lib/func";
 import { api } from "@/utils/api";
 import { toast } from "sonner";
 import { type ClientUserType } from "@/data/common";
+import { ActionButton } from "@/pages/forge";
 
 // Constants
 const DIFFICULTY_MULTIPLIER = 1.18;
@@ -102,10 +103,12 @@ export default function UpgradeLuckDialog({
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button variant="secondary">
-          <Clover className="mr-2 h-4 w-4" />
-          Upgrade Luck
-        </Button>
+        <ActionButton
+          disabled={isPending}
+          icon={Clover}
+          label="Purchase Luck"
+          variant="outline"
+        />
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
