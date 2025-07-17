@@ -1,3 +1,4 @@
+<!-- This is the update changelog post template -->
 **__Update v<ver>__** :sparkles:
 
 **:rocket: Major Changes**
